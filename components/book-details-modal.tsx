@@ -1,6 +1,6 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Star, Calendar, FileText, User, BookOpen, Heart, CheckCircle } from "lucide-react"
+import { X, Star, Calendar, FileText, User, BookOpen, Heart, CheckCircle, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -15,6 +15,7 @@ interface Book {
   pages: number
   publishYear: number
   status: "none" | "wishlist" | "readLater" | "read"
+  language: string
 }
 
 interface BookDetailsModalProps {
@@ -159,7 +160,7 @@ export default function BookDetailsModal({
                   </div>
 
                   {/* Book Stats */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200/50">
                       <div className="flex items-center gap-2 mb-1">
                         <Star className="w-5 h-5 text-yellow-500 fill-current" />
@@ -176,12 +177,20 @@ export default function BookDetailsModal({
                       <p className="text-2xl font-bold text-gray-800">{book.pages}</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200/50 col-span-2 sm:col-span-1">
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200/50">
                       <div className="flex items-center gap-2 mb-1">
                         <Calendar className="w-5 h-5 text-purple-500" />
                         <span className="text-sm font-medium text-gray-600">Published</span>
                       </div>
                       <p className="text-2xl font-bold text-gray-800">{book.publishYear}</p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl border border-green-200/50">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Globe className="w-5 h-5 text-green-500" />
+                        <span className="text-sm font-medium text-gray-600">Language</span>
+                      </div>
+                      <p className="text-2xl font-bold text-gray-800">{book.language}</p>
                     </div>
                   </div>
                 </div>

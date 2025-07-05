@@ -24,6 +24,7 @@ interface Book {
   pages: number
   publishYear: number
   status: "none" | "wishlist" | "readLater" | "read"
+  language: string
 }
 
 const sampleBooks: Book[] = [
@@ -39,6 +40,7 @@ const sampleBooks: Book[] = [
     pages: 288,
     publishYear: 2020,
     status: "read",
+    language: "English",
   },
   {
     id: "2",
@@ -52,6 +54,7 @@ const sampleBooks: Book[] = [
     pages: 320,
     publishYear: 2018,
     status: "wishlist",
+    language: "English",
   },
   {
     id: "3",
@@ -65,6 +68,7 @@ const sampleBooks: Book[] = [
     pages: 688,
     publishYear: 1965,
     status: "readLater",
+    language: "English",
   },
   {
     id: "4",
@@ -78,6 +82,7 @@ const sampleBooks: Book[] = [
     pages: 400,
     publishYear: 2017,
     status: "read",
+    language: "English",
   },
   {
     id: "5",
@@ -91,6 +96,7 @@ const sampleBooks: Book[] = [
     pages: 334,
     publishYear: 2018,
     status: "none",
+    language: "English",
   },
   {
     id: "6",
@@ -104,6 +110,7 @@ const sampleBooks: Book[] = [
     pages: 336,
     publishYear: 2019,
     status: "readLater",
+    language: "English",
   },
 ]
 
@@ -526,6 +533,8 @@ export default function BookWebsite() {
                               </div>
                               <span className="text-gray-400">•</span>
                               <span className="text-sm text-gray-600">{book.pages} pages</span>
+                              <span className="text-gray-400">•</span>
+                              <span className="text-sm text-gray-600">{book.language}</span>
                             </div>
                             <p className="text-sm text-gray-600 line-clamp-2 flex-grow">{book.description}</p>
                           </CardContent>
@@ -580,6 +589,7 @@ export default function BookWebsite() {
                                   </div>
                                   <span className="text-gray-600">{book.pages} pages</span>
                                   <span className="text-gray-600">{book.publishYear}</span>
+                                  <span className="text-gray-600">{book.language}</span>
                                 </div>
                                 <p className="text-gray-600 mb-4 line-clamp-2">{book.description}</p>
                                 <div className="flex gap-2 flex-wrap">
