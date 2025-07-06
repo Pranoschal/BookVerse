@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "Curate your personal library, track your reading journey, and explore endless stories in your own BookVerse",
   generator: "v0.dev",
+  icons: {
+    icon: "/bookverse.png", // Path relative to the public folder
+  },
 };
 
 export default function RootLayout({
