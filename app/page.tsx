@@ -1,5 +1,6 @@
 "use client"
 
+import { CopilotPopup } from "@copilotkit/react-ui";
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Heart, BookOpen, CheckCircle, Star, Filter, Grid, List, X, Edit } from "lucide-react"
@@ -12,6 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import BookModalComponent from "@/components/add-book-modal"
 import BookDetailsModal from "@/components/book-details-modal"
 import FloatingBooks from "@/components/floating-books"
+import Image from "next/image"
+import { useBookCopilotActions } from "./copilot-calls/copilot-actions";
+import { v4 as uuidv4 } from 'uuid';
 
 interface Book {
   id: string
@@ -25,6 +29,7 @@ interface Book {
   publishYear: number
   status: "none" | "wishlist" | "readLater" | "read"
   language: string
+  publisher: string
 }
 
 const sampleBooks: Book[] = [
@@ -32,7 +37,7 @@ const sampleBooks: Book[] = [
     id: "1",
     title: "The Midnight Library",
     author: "Matt Haig",
-    cover: "/placeholder.svg?height=300&width=200",
+    cover: "https://m.media-amazon.com/images/I/81J6APjwxlL.jpg",
     rating: 4.2,
     genre: "Fiction",
     description:
@@ -41,12 +46,13 @@ const sampleBooks: Book[] = [
     publishYear: 2020,
     status: "read",
     language: "English",
+    publisher: "Canongate Books",
   },
   {
     id: "2",
     title: "Atomic Habits",
     author: "James Clear",
-    cover: "/placeholder.svg?height=300&width=200",
+    cover: "https://ia801708.us.archive.org/BookReader/BookReaderImages.php?zip=/31/items/atomic-habits/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2.zip&file=Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_0000.jp2&id=atomic-habits&scale=4&rotate=0",
     rating: 4.8,
     genre: "Self-Help",
     description:
@@ -55,12 +61,13 @@ const sampleBooks: Book[] = [
     publishYear: 2018,
     status: "wishlist",
     language: "English",
+    publisher: "Avery",
   },
   {
     id: "3",
     title: "Dune",
     author: "Frank Herbert",
-    cover: "/placeholder.svg?height=300&width=200",
+    cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScEtF9aLVNs4DvwTF0AzHn4mgqaT27YTBRgA&s",
     rating: 4.5,
     genre: "Sci-Fi",
     description:
@@ -69,12 +76,13 @@ const sampleBooks: Book[] = [
     publishYear: 1965,
     status: "readLater",
     language: "English",
+    publisher: "Chilton Books",
   },
   {
     id: "4",
     title: "The Seven Husbands of Evelyn Hugo",
     author: "Taylor Jenkins Reid",
-    cover: "/placeholder.svg?height=300&width=200",
+    cover: "https://m.media-amazon.com/images/I/81LscKUplaL.jpg",
     rating: 4.6,
     genre: "Romance",
     description:
@@ -83,12 +91,13 @@ const sampleBooks: Book[] = [
     publishYear: 2017,
     status: "read",
     language: "English",
+    publisher: "Atria Books",
   },
   {
     id: "5",
     title: "Educated",
     author: "Tara Westover",
-    cover: "/placeholder.svg?height=300&width=200",
+    cover: "https://m.media-amazon.com/images/I/41fkYRj1OwL._SL500_.jpg",
     rating: 4.4,
     genre: "Memoir",
     description:
@@ -97,12 +106,13 @@ const sampleBooks: Book[] = [
     publishYear: 2018,
     status: "none",
     language: "English",
+    publisher: "Random House",
   },
   {
     id: "6",
     title: "The Silent Patient",
     author: "Alex Michaelides",
-    cover: "/placeholder.svg?height=300&width=200",
+    cover: "https://m.media-amazon.com/images/I/81JJPDNlxSL._UF1000,1000_QL80_.jpg",
     rating: 4.1,
     genre: "Thriller",
     description:
@@ -111,6 +121,7 @@ const sampleBooks: Book[] = [
     publishYear: 2019,
     status: "readLater",
     language: "English",
+    publisher: "Celadon Books",
   },
 ]
 
@@ -174,7 +185,7 @@ export default function BookWebsite() {
   const addNewBook = (newBook: Omit<Book, "id">) => {
     const bookWithId = {
       ...newBook,
-      id: Date.now().toString(), // Simple ID generation
+      id: uuidv4(), // Simple ID generation
     }
     setBooks((prevBooks) => [...prevBooks, bookWithId])
     setIsBookModalOpen(false)
@@ -228,6 +239,8 @@ export default function BookWebsite() {
   }
 
   const statusCounts = getStatusCounts()
+
+  useBookCopilotActions<Omit<Book, "id">, Book>(addNewBook, editBook,deleteBook, books);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -287,7 +300,7 @@ export default function BookWebsite() {
         </div>
 
         {/* Floating Books Animation */}
-        <FloatingBooks />
+       <FloatingBooks />
       </motion.section>
 
       {/* Main Content */}
@@ -449,7 +462,7 @@ export default function BookWebsite() {
                             <img
                               src={book.cover || "/placeholder.svg"}
                               alt={book.title}
-                              className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
+                              className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110 bg-gray-200"
                               onClick={() => openDetailsModal(book)}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -525,7 +538,8 @@ export default function BookWebsite() {
                             <h3 className="font-bold text-lg mb-1 line-clamp-2 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
                               {book.title}
                             </h3>
-                            <p className="text-gray-600 mb-2">{book.author}</p>
+                            <p className="text-gray-600 mb-1">{book.author}</p>
+                            <p className="text-gray-500 text-sm mb-2">{book.publisher}</p>
                             <div className="flex items-center gap-2 mb-2">
                               <div className="flex items-center">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -565,18 +579,25 @@ export default function BookWebsite() {
                         <Card className="bg-gradient-to-br from-white/90 via-white/80 to-blue-50/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] cursor-pointer">
                           <CardContent className="p-6" onClick={() => openDetailsModal(book)}>
                             <div className="flex gap-4">
-                              <img
-                                src={book.cover || "/placeholder.svg"}
-                                alt={book.title}
-                                className="w-20 h-28 object-cover rounded-lg shadow-md"
-                              />
+                              import Image from 'next/image';
+
+<Image
+  src={book.cover || "/placeholder.svg"}
+  alt={book.title}
+  className="w-20 h-28 object-cover rounded-lg shadow-md"
+  width={80}    // Tailwind w-20 = 5rem = 80px
+  height={112}  // Tailwind h-28 = 7rem = 112px
+  unoptimized   // Optional: use this if the source is untrusted or not in remotePatterns
+/>
+
                               <div className="flex-1">
                                 <div className="flex items-start justify-between mb-2">
                                   <div>
                                     <h3 className="font-bold text-xl mb-1 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                                       {book.title}
                                     </h3>
-                                    <p className="text-gray-600 mb-2">{book.author}</p>
+                                    <p className="text-gray-600 mb-1">{book.author}</p>
+                                    <p className="text-gray-500 text-sm mb-2">{book.publisher}</p>
                                   </div>
                                   <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
                                     {book.genre}
@@ -746,6 +767,13 @@ export default function BookWebsite() {
           </div>
         </div>
       </footer>
+      <CopilotPopup
+        instructions={"You are assisting the user as best as you can. Answer in the best way possible given the data you have."}
+        labels={{
+          title: "Popup Assistant",
+          initial: "Hello, how can I help you today?",
+        }}
+      />
     </div>
   )
 }

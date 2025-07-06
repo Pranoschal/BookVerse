@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, BookOpen, Star, Calendar, FileText, User, Tag, Globe } from "lucide-react"
+import { X, BookOpen, Star, Calendar, FileText, User, Tag, Globe, Building } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,6 +23,7 @@ interface Book {
   publishYear: number
   status: "none" | "wishlist" | "readLater" | "read"
   language: string
+  publisher: string
 }
 
 interface BookModalProps {
@@ -109,6 +110,7 @@ export default function BookModalComponent({
     publishYear: new Date().getFullYear(),
     status: "none",
     language: "English",
+    publisher: "",
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof Book, string>>>({})
@@ -130,6 +132,7 @@ export default function BookModalComponent({
         publishYear: new Date().getFullYear(),
         status: "none",
         language: "English",
+        publisher: "",
       })
     }
   }, [mode, editingBook, isOpen])
@@ -149,6 +152,7 @@ export default function BookModalComponent({
     if (!formData.author.trim()) newErrors.author = "Author is required"
     if (!formData.genre) newErrors.genre = "Genre is required"
     if (!formData.language) newErrors.language = "Language is required"
+    if (!formData.publisher.trim()) newErrors.publisher = "Publisher is required"
     if (!formData.description.trim()) newErrors.description = "Description is required"
     if (formData.pages <= 0) newErrors.pages = "Pages must be greater than 0"
     if (formData.publishYear < 1000 || formData.publishYear > new Date().getFullYear() + 10)
@@ -187,6 +191,7 @@ export default function BookModalComponent({
         publishYear: new Date().getFullYear(),
         status: "none",
         language: "English",
+        publisher: "",
       })
       setErrors({})
     }
@@ -207,6 +212,7 @@ export default function BookModalComponent({
       publishYear: new Date().getFullYear(),
       status: "none",
       language: "English",
+      publisher: "",
     })
     setErrors({})
   }
@@ -296,6 +302,24 @@ export default function BookModalComponent({
                       }`}
                     />
                     {errors.author && <p className="text-red-500 text-sm">{errors.author}</p>}
+                  </div>
+
+                  {/* Publisher */}
+                  <div className="space-y-2">
+                    <Label htmlFor="publisher" className="flex items-center gap-2 text-gray-700 font-medium">
+                      <Building className="w-4 h-4 text-orange-500" />
+                      Publisher *
+                    </Label>
+                    <Input
+                      id="publisher"
+                      value={formData.publisher}
+                      onChange={(e) => handleInputChange("publisher", e.target.value)}
+                      placeholder="Enter publisher name"
+                      className={`bg-white/90 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 text-sm sm:text-base ${
+                        errors.publisher ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                      }`}
+                    />
+                    {errors.publisher && <p className="text-red-500 text-sm">{errors.publisher}</p>}
                   </div>
 
                   {/* Genre */}

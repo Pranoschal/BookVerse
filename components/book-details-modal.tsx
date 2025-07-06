@@ -1,6 +1,6 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Star, Calendar, FileText, User, BookOpen, Heart, CheckCircle, Globe } from "lucide-react"
+import { X, Star, Calendar, FileText, User, BookOpen, Heart, CheckCircle, Globe, Building } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -16,6 +16,7 @@ interface Book {
   publishYear: number
   status: "none" | "wishlist" | "readLater" | "read"
   language: string
+  publisher: string
 }
 
 interface BookDetailsModalProps {
@@ -153,44 +154,59 @@ export default function BookDetailsModal({
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
                       {book.title}
                     </h1>
-                    <p className="text-lg sm:text-xl text-gray-600 mb-4">by {book.author}</p>
+                    <p className="text-lg sm:text-xl text-gray-600 mb-2">by {book.author}</p>
+                    <p className="text-base text-gray-500 mb-4">{book.publisher}</p>
                     <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 shadow-md">
                       {book.genre}
                     </Badge>
                   </div>
 
-                  {/* Book Stats */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200/50">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium text-gray-600">Rating</span>
+                  {/* Book Stats - Redesigned Layout */}
+                  <div className="space-y-4">
+                    {/* First Row - Rating, Pages, Published */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200/50 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                          <span className="text-sm font-medium text-gray-600">Rating</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-800">{book.rating}</p>
                       </div>
-                      <p className="text-2xl font-bold text-gray-800">{book.rating}</p>
+
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200/50 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <FileText className="w-5 h-5 text-blue-500" />
+                          <span className="text-sm font-medium text-gray-600">Pages</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-800">{book.pages}</p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200/50 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Calendar className="w-5 h-5 text-purple-500" />
+                          <span className="text-sm font-medium text-gray-600">Published</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-800">{book.publishYear}</p>
+                      </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200/50">
-                      <div className="flex items-center gap-2 mb-1">
-                        <FileText className="w-5 h-5 text-blue-500" />
-                        <span className="text-sm font-medium text-gray-600">Pages</span>
+                    {/* Second Row - Language and Publisher */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl border border-green-200/50 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Globe className="w-5 h-5 text-green-500" />
+                          <span className="text-sm font-medium text-gray-600">Language</span>
+                        </div>
+                        <p className="text-xl font-bold text-gray-800">{book.language}</p>
                       </div>
-                      <p className="text-2xl font-bold text-gray-800">{book.pages}</p>
-                    </div>
 
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200/50">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Calendar className="w-5 h-5 text-purple-500" />
-                        <span className="text-sm font-medium text-gray-600">Published</span>
+                      <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-xl border border-orange-200/50 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Building className="w-5 h-5 text-orange-500" />
+                          <span className="text-sm font-medium text-gray-600">Publisher</span>
+                        </div>
+                        <p className="text-base font-bold text-gray-800 leading-tight px-2">{book.publisher}</p>
                       </div>
-                      <p className="text-2xl font-bold text-gray-800">{book.publishYear}</p>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl border border-green-200/50">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Globe className="w-5 h-5 text-green-500" />
-                        <span className="text-sm font-medium text-gray-600">Language</span>
-                      </div>
-                      <p className="text-2xl font-bold text-gray-800">{book.language}</p>
                     </div>
                   </div>
                 </div>
