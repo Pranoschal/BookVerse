@@ -4,7 +4,17 @@ import { useCopilotReadable } from "@copilotkit/react-core";
 import { searchBooks } from "@/lib/googleBooks";
 
 // Add this to your page.tsx component (inside the component function)
-export function useBookCopilotActions<TAdd, TEdit extends { id: string }>(
+export function useBookCopilotActions<
+  TAdd,
+  TEdit extends {
+    id: string;
+    title: string;
+    author: string;
+    genre: string;
+    status: string;
+    rating: number;
+  }
+>(
   addNewBook: (book: TAdd) => void,
   editBook: (updatedBook: TEdit) => void,
   deleteBook: (bookId: string) => void,
@@ -15,6 +25,7 @@ export function useBookCopilotActions<TAdd, TEdit extends { id: string }>(
       description:
         "These are all the books that are there in the app.This is only for add,edit or delete operations and not to be used for searching a book.",
       value: books,
+      available: "enabled",
     },
     [books]
   );
@@ -33,18 +44,18 @@ export function useBookCopilotActions<TAdd, TEdit extends { id: string }>(
     ],
     handler: async ({ bookName }) => {
       try {
-        const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: bookName }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        return `Error: ${errorData.error || 'Failed to search books'}`;
-      }
+        const response = await fetch("/api/search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: bookName }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          return `Error: ${errorData.error || "Failed to search books"}`;
+        }
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -226,16 +237,231 @@ export function useBookCopilotActions<TAdd, TEdit extends { id: string }>(
       return `Successfully added "${title}" by ${author} to your BookVerse library!`;
     },
   });
+  // useCopilotAction({
+  //   name: "editBook",
+  //   description:
+  //     "IMPORTANT: Call this when the user wants to edit or update an existing book. Edit an existing book in the user's BookVerse library by updating its details. This action completes the book editing process entirely.",
+  //   parameters: [
+  //     {
+  //       name: "bookIdentifier",
+  //       type: "string",
+  //       description:
+  //         "The title, author, or unique identifier to find the book to edit",
+  //       required: true,
+  //     },
+  //     {
+  //       name: "title",
+  //       type: "string",
+  //       description: "The updated title of the book",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "author",
+  //       type: "string",
+  //       description: "The updated author name",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "publisher",
+  //       type: "string",
+  //       description: "The updated publisher name",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "genre",
+  //       type: "string",
+  //       description:
+  //         "The updated genre (e.g., Fiction, Non-Fiction, Mystery, Romance, Sci-Fi, Fantasy, etc.)",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "language",
+  //       type: "string",
+  //       description:
+  //         "The updated language of the book (e.g., English, Spanish, French, etc.)",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "rating",
+  //       type: "number",
+  //       description: "The updated rating between 0 and 5",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "pages",
+  //       type: "number",
+  //       description: "The updated number of pages",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "publishYear",
+  //       type: "number",
+  //       description: "The updated publication year",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "cover",
+  //       type: "string",
+  //       description: "The updated cover image URL of the book",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "description",
+  //       type: "string",
+  //       description: "The updated book description",
+  //       required: false,
+  //     },
+  //     {
+  //       name: "status",
+  //       type: "string",
+  //       description:
+  //         "The updated reading status (none, wishlist, readLater, read)",
+  //       required: false,
+  //     },
+  //   ],
+  //   handler: async ({
+  //     bookIdentifier,
+  //     title,
+  //     author,
+  //     publisher,
+  //     genre,
+  //     language,
+  //     rating,
+  //     pages,
+  //     publishYear,
+  //     cover,
+  //     description,
+  //     status,
+  //   }) => {
+  //     // Find the existing book by title, author, or ID
+  //     const existingBook = (books as any[]).find(
+  //       (book) =>
+  //         book.title?.toLowerCase().includes(bookIdentifier.toLowerCase()) ||
+  //         book.author?.toLowerCase().includes(bookIdentifier.toLowerCase()) ||
+  //         book.id === bookIdentifier
+  //     );
+
+  //     if (!existingBook) {
+  //       throw new Error(
+  //         `Book with identifier "${bookIdentifier}" not found in the library. Please check the book title or author name.`
+  //       );
+  //     }
+
+  //     // Validate updated fields if provided
+  //     if (pages !== undefined && pages <= 0) {
+  //       throw new Error("Number of pages must be greater than 0.");
+  //     }
+
+  //     if (
+  //       publishYear !== undefined &&
+  //       (publishYear < 1000 || publishYear > new Date().getFullYear() + 10)
+  //     ) {
+  //       throw new Error("Please provide a valid publish year.");
+  //     }
+
+  //     if (rating !== undefined && (rating < 0 || rating > 5)) {
+  //       throw new Error("Rating must be between 0 and 5.");
+  //     }
+
+  //     if (status !== undefined) {
+  //       const validStatuses = ["none", "wishlist", "readLater", "read"];
+  //       if (!validStatuses.includes(status)) {
+  //         throw new Error(
+  //           "Status must be one of: none, wishlist, readLater, or read."
+  //         );
+  //       }
+  //     }
+
+  //     // Create updated book object with only the fields that were provided
+  //     const updatedBook = {
+  //       ...existingBook,
+  //       ...(title && { title: title.trim() }),
+  //       ...(author && { author: author.trim() }),
+  //       ...(publisher && { publisher: publisher.trim() }),
+  //       ...(genre && { genre }),
+  //       ...(language && { language }),
+  //       ...(rating !== undefined && { rating }),
+  //       ...(pages !== undefined && { pages }),
+  //       ...(publishYear !== undefined && { publishYear }),
+  //       ...(cover && { cover: cover.trim() }),
+  //       ...(description && { description: description.trim() }),
+  //       ...(status && {
+  //         status: status as "none" | "wishlist" | "readLater" | "read",
+  //       }),
+  //     };
+
+  //     // Update the book using your existing editBook function
+  //     editBook(updatedBook as TEdit);
+
+  //     return `Successfully updated "${updatedBook.title}" by ${updatedBook.author} in your BookVerse library!`;
+  //   },
+  // });
+
+  useCopilotAction({
+    name: "findBookId",
+    description:
+      "Find the book ID for a book by searching through the user's library. Use this when the user wants to edit or delete a book but you need to find its ID first.",
+    parameters: [
+      {
+        name: "searchTerm",
+        type: "string",
+        description:
+          "The book title, author name, or keywords to search for in the user's library",
+        required: true,
+      },
+    ],
+    handler: async ({ searchTerm }) => {
+      const matchingBooks = (books as any[]).filter(
+        (book) =>
+          book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          book.author?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      if (matchingBooks.length === 0) {
+        return `No books found matching "${searchTerm}" in your library.`;
+      }
+
+      if (matchingBooks.length === 1) {
+        const book = matchingBooks[0];
+        return `Found book: "${book.title}" by ${book.author}
+Book ID: ${book.id}
+
+Current details:
+- Title: ${book.title}
+- Author: ${book.author}
+- Publisher: ${book.publisher || "Not specified"}
+- Genre: ${book.genre || "Not specified"}
+- Language: ${book.language || "Not specified"}
+- Rating: ${book.rating || 0}/5
+- Pages: ${book.pages || "Not specified"}
+- Published: ${book.publishYear || "Not specified"}
+- Status: ${book.status || "none"}
+
+You can now edit or delete  this book depending on what action the user wants to do using the book ID: ${book.id}`;
+      }
+
+      // Multiple matches found
+      const bookList = matchingBooks
+        .map((book) => `ID: ${book.id} - "${book.title}" by ${book.author}`)
+        .join("\n");
+
+      return `Found ${matchingBooks.length} books matching "${searchTerm}":
+
+${bookList}
+
+Please specify which book you want to edit or delete by using its exact ID.`;
+    },
+  });
   useCopilotAction({
     name: "editBook",
     description:
-      "IMPORTANT: Call this when the user wants to edit or update an existing book. Edit an existing book in the user's BookVerse library by updating its details. This action completes the book editing process entirely.",
+      "IMPORTANT: Call this when the user wants to edit or update an existing book. This action requires the exact book ID. To find the book ID, first look at the available books list to identify the correct book ID for the book the user wants to edit.",
     parameters: [
       {
-        name: "bookIdentifier",
+        name: "bookId",
         type: "string",
         description:
-          "The title, author, or unique identifier to find the book to edit",
+          "The exact book ID from the available books list. This must be the exact ID, not the title or author name.",
         required: true,
       },
       {
@@ -309,7 +535,7 @@ export function useBookCopilotActions<TAdd, TEdit extends { id: string }>(
       },
     ],
     handler: async ({
-      bookIdentifier,
+      bookId,
       title,
       author,
       publisher,
@@ -322,42 +548,43 @@ export function useBookCopilotActions<TAdd, TEdit extends { id: string }>(
       description,
       status,
     }) => {
-      // Find the existing book by title, author, or ID
-      const existingBook = (books as any[]).find(
-        (book) =>
-          book.title?.toLowerCase().includes(bookIdentifier.toLowerCase()) ||
-          book.author?.toLowerCase().includes(bookIdentifier.toLowerCase()) ||
-          book.id === bookIdentifier
-      );
+      // Find the existing book by ID only
+      const existingBook = (books as any[]).find((book) => book.id === bookId);
 
       if (!existingBook) {
-        throw new Error(
-          `Book with identifier "${bookIdentifier}" not found in the library. Please check the book title or author name.`
-        );
+        // Provide helpful error message with available book IDs
+        const availableBooks = (books as any[])
+          .map((book) => `ID: ${book.id} - "${book.title}" by ${book.author}`)
+          .join("\n");
+
+        return `Book with ID "${bookId}" not found in the library. 
+
+Available books:
+${availableBooks}
+
+Please use the exact book ID from the list above.`;
       }
 
       // Validate updated fields if provided
       if (pages !== undefined && pages <= 0) {
-        throw new Error("Number of pages must be greater than 0.");
+        return "Error: Number of pages must be greater than 0.";
       }
 
       if (
         publishYear !== undefined &&
         (publishYear < 1000 || publishYear > new Date().getFullYear() + 10)
       ) {
-        throw new Error("Please provide a valid publish year.");
+        return "Error: Please provide a valid publish year.";
       }
 
       if (rating !== undefined && (rating < 0 || rating > 5)) {
-        throw new Error("Rating must be between 0 and 5.");
+        return "Error: Rating must be between 0 and 5.";
       }
 
       if (status !== undefined) {
         const validStatuses = ["none", "wishlist", "readLater", "read"];
         if (!validStatuses.includes(status)) {
-          throw new Error(
-            "Status must be one of: none, wishlist, readLater, or read."
-          );
+          return "Error: Status must be one of: none, wishlist, readLater, or read.";
         }
       }
 
@@ -388,35 +615,82 @@ export function useBookCopilotActions<TAdd, TEdit extends { id: string }>(
   useCopilotAction({
     name: "deleteBook",
     description:
-      "IMPORTANT: Call this when the user wants to delete or remove a book from their library. Delete an existing book from the user's BookVerse library. This action permanently removes the book from the collection.",
+      "IMPORTANT: Call this when the user wants to delete or remove a book from their library. This action requires the exact book ID. To find the book ID, first look at the available books list to identify the correct book ID for the book the user wants to delete.",
     parameters: [
       {
-        name: "bookIdentifier",
+        name: "bookId",
         type: "string",
         description:
-          "The title, author, or unique identifier to find the book to delete",
+          "The exact book ID from the available books list. This must be the exact ID, not the title or author name.",
         required: true,
       },
     ],
-    handler: async ({ bookIdentifier }) => {
-      // Find the existing book by title, author, or ID
-      const existingBook = (books as any[]).find(
-        (book) =>
-          book.title?.toLowerCase().includes(bookIdentifier.toLowerCase()) ||
-          book.author?.toLowerCase().includes(bookIdentifier.toLowerCase()) ||
-          book.id === bookIdentifier
-      );
+    handler: async ({ bookId }) => {
+      // Find the existing book by ID only
+      const existingBook = (books as any[]).find((book) => book.id === bookId);
 
       if (!existingBook) {
-        throw new Error(
-          `Book with identifier "${bookIdentifier}" not found in the library. Please check the book title or author name.`
-        );
+        // Provide helpful error message with available book IDs
+        const availableBooks = (books as any[])
+          .map((book) => `ID: ${book.id} - "${book.title}" by ${book.author}`)
+          .join("\n");
+
+        return `Book with ID "${bookId}" not found in the library. 
+
+Available books:
+${availableBooks}
+
+Please use the exact book ID from the list above.`;
       }
 
-      // Delete the book using your existing deleteBook function
-      deleteBook(existingBook.id);
+      // Delete the book using the existing deleteBook function
+      deleteBook(bookId);
 
       return `Successfully deleted "${existingBook.title}" by ${existingBook.author} from your BookVerse library!`;
     },
   });
+//   useCopilotAction({
+//     name: "findBookId",
+//     description:
+//       "Find the book ID for a book by searching through the user's library. Use this when the user wants to delete a book but you need to find its ID first.",
+//     parameters: [
+//       {
+//         name: "searchTerm",
+//         type: "string",
+//         description:
+//           "The book title, author name, or keywords to search for in the user's library",
+//         required: true,
+//       },
+//     ],
+//     handler: async ({ searchTerm }) => {
+//       const matchingBooks = (books as any[]).filter(
+//         (book) =>
+//           book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//           book.author?.toLowerCase().includes(searchTerm.toLowerCase())
+//       );
+
+//       if (matchingBooks.length === 0) {
+//         return `No books found matching "${searchTerm}" in your library.`;
+//       }
+
+//       if (matchingBooks.length === 1) {
+//         const book = matchingBooks[0];
+//         return `Found book: "${book.title}" by ${book.author}
+// Book ID: ${book.id}
+
+// You can now delete this book using the book ID: ${book.id}`;
+//       }
+
+//       // Multiple matches found
+//       const bookList = matchingBooks
+//         .map((book) => `ID: ${book.id} - "${book.title}" by ${book.author}`)
+//         .join("\n");
+
+//       return `Found ${matchingBooks.length} books matching "${searchTerm}":
+
+// ${bookList}
+
+// Please specify which book you want to delete by using its exact ID.`;
+//     },
+//   });
 }
