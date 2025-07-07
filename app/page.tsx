@@ -1,35 +1,52 @@
-"use client"
+"use client";
 
 import { CopilotPopup } from "@copilotkit/react-ui";
-import { useState, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Search, Heart, BookOpen, CheckCircle, Star, Filter, Grid, List, X, Edit } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import BookModalComponent from "@/components/add-book-modal"
-import BookDetailsModal from "@/components/book-details-modal"
-import FloatingBooks from "@/components/floating-books"
-import Image from "next/image"
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  Heart,
+  BookOpen,
+  CheckCircle,
+  Star,
+  Filter,
+  Grid,
+  List,
+  X,
+  Edit,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import BookModalComponent from "@/components/add-book-modal";
+import BookDetailsModal from "@/components/book-details-modal";
+import FloatingBooks from "@/components/floating-books";
+import Image from "next/image";
 import { useBookCopilotActions } from "./copilot-calls/copilot-actions";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 interface Book {
-  id: string
-  title: string
-  author: string
-  cover: string
-  rating: number
-  genre: string
-  description: string
-  pages: number
-  publishYear: number
-  status: "none" | "wishlist" | "readLater" | "read"
-  language: string
-  publisher: string
+  id: string;
+  title: string;
+  author: string;
+  cover: string;
+  rating: number;
+  genre: string;
+  description: string;
+  pages: number;
+  publishYear: number;
+  status: "none" | "wishlist" | "readLater" | "read";
+  language: string;
+  publisher: string;
 }
 
 const sampleBooks: Book[] = [
@@ -52,7 +69,8 @@ const sampleBooks: Book[] = [
     id: "2",
     title: "Atomic Habits",
     author: "James Clear",
-    cover: "https://ia801708.us.archive.org/BookReader/BookReaderImages.php?zip=/31/items/atomic-habits/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2.zip&file=Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_0000.jp2&id=atomic-habits&scale=4&rotate=0",
+    cover:
+      "https://ia801708.us.archive.org/BookReader/BookReaderImages.php?zip=/31/items/atomic-habits/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2.zip&file=Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_0000.jp2&id=atomic-habits&scale=4&rotate=0",
     rating: 4.8,
     genre: "Self-Help",
     description:
@@ -67,7 +85,8 @@ const sampleBooks: Book[] = [
     id: "3",
     title: "Dune",
     author: "Frank Herbert",
-    cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScEtF9aLVNs4DvwTF0AzHn4mgqaT27YTBRgA&s",
+    cover:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScEtF9aLVNs4DvwTF0AzHn4mgqaT27YTBRgA&s",
     rating: 4.5,
     genre: "Sci-Fi",
     description:
@@ -112,7 +131,8 @@ const sampleBooks: Book[] = [
     id: "6",
     title: "The Silent Patient",
     author: "Alex Michaelides",
-    cover: "https://m.media-amazon.com/images/I/81JJPDNlxSL._UF1000,1000_QL80_.jpg",
+    cover:
+      "https://m.media-amazon.com/images/I/81JJPDNlxSL._UF1000,1000_QL80_.jpg",
     rating: 4.1,
     genre: "Thriller",
     description:
@@ -123,40 +143,40 @@ const sampleBooks: Book[] = [
     language: "English",
     publisher: "Celadon Books",
   },
-]
+];
 
 export default function BookWebsite() {
-  const [books, setBooks] = useState<Book[]>(sampleBooks)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedGenre, setSelectedGenre] = useState("all")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [activeTab, setActiveTab] = useState("all")
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<"add" | "edit">("add")
-  const [editingBook, setEditingBook] = useState<Book | null>(null)
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null)
+  const [books, setBooks] = useState<Book[]>(sampleBooks);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [activeTab, setActiveTab] = useState("all");
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   const genres = useMemo(() => {
-    const allGenres = books.map((book) => book.genre)
-    return ["all", ...Array.from(new Set(allGenres))]
-  }, [books])
+    const allGenres = books.map((book) => book.genre);
+    return ["all", ...Array.from(new Set(allGenres))];
+  }, [books]);
 
   const filteredBooks = useMemo(() => {
-    let filtered = books
+    let filtered = books;
 
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
         (book) =>
           book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          book.author.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+          book.author.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
 
     // Filter by genre
     if (selectedGenre !== "all") {
-      filtered = filtered.filter((book) => book.genre === selectedGenre)
+      filtered = filtered.filter((book) => book.genre === selectedGenre);
     }
 
     // Filter by tab
@@ -164,70 +184,76 @@ export default function BookWebsite() {
       filtered = filtered.filter((book) => {
         switch (activeTab) {
           case "wishlist":
-            return book.status === "wishlist"
+            return book.status === "wishlist";
           case "readLater":
-            return book.status === "readLater"
+            return book.status === "readLater";
           case "read":
-            return book.status === "read"
+            return book.status === "read";
           default:
-            return true
+            return true;
         }
-      })
+      });
     }
 
-    return filtered
-  }, [books, searchQuery, selectedGenre, activeTab])
+    return filtered;
+  }, [books, searchQuery, selectedGenre, activeTab]);
 
   const updateBookStatus = (bookId: string, newStatus: Book["status"]) => {
-    setBooks((prevBooks) => prevBooks.map((book) => (book.id === bookId ? { ...book, status: newStatus } : book)))
-  }
+    setBooks((prevBooks) =>
+      prevBooks.map((book) =>
+        book.id === bookId ? { ...book, status: newStatus } : book
+      )
+    );
+  };
 
   const addNewBook = (newBook: Omit<Book, "id">) => {
     const bookWithId = {
       ...newBook,
       id: uuidv4(), // Simple ID generation
-    }
-    setBooks((prevBooks) => [...prevBooks, bookWithId])
-    setIsBookModalOpen(false)
-  }
+    };
+    setBooks((prevBooks) => [...prevBooks, bookWithId]);
+    setIsBookModalOpen(false);
+  };
 
   const editBook = (updatedBook: Book) => {
-    setBooks((prevBooks) => prevBooks.map((book) => (book.id === updatedBook.id ? updatedBook : book)))
-    setIsBookModalOpen(false)
-    setEditingBook(null)
-  }
+    setBooks((prevBooks) =>
+      prevBooks.map((book) => (book.id === updatedBook.id ? updatedBook : book))
+    );
+    setIsBookModalOpen(false);
+    setEditingBook(null);
+  };
 
   const deleteBook = (bookId: string) => {
-    setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
-  }
+    setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId));
+  };
 
   const openAddModal = () => {
-    setModalMode("add")
-    setEditingBook(null)
-    setIsBookModalOpen(true)
-  }
+    setModalMode("add");
+    setEditingBook(null);
+    setIsBookModalOpen(true);
+  };
 
   const openEditModal = (book: Book) => {
-    setModalMode("edit")
-    setEditingBook(book)
-    setIsBookModalOpen(true)
-    setIsDetailsModalOpen(false) // Close details modal if open
-  }
+    setModalMode("edit");
+    setEditingBook(book);
+    setIsBookModalOpen(true);
+    setIsDetailsModalOpen(false); // Close details modal if open
+  };
 
   const openDetailsModal = (book: Book) => {
-    setSelectedBook(book)
-    setIsDetailsModalOpen(true)
-  }
+    setSelectedBook(book);
+    setIsDetailsModalOpen(true);
+  };
 
   const closeModal = () => {
-    setIsBookModalOpen(false)
-    setEditingBook(null)
-  }
+    setIsBookModalOpen(false);
+    setEditingBook(null);
+  };
 
   const closeDetailsModal = () => {
-    setIsDetailsModalOpen(false)
-    setSelectedBook(null)
-  }
+    setIsDetailsModalOpen(false);
+    setSelectedBook(null);
+  };
 
   const getStatusCounts = () => {
     return {
@@ -235,12 +261,17 @@ export default function BookWebsite() {
       wishlist: books.filter((b) => b.status === "wishlist").length,
       readLater: books.filter((b) => b.status === "readLater").length,
       read: books.filter((b) => b.status === "read").length,
-    }
-  }
+    };
+  };
 
-  const statusCounts = getStatusCounts()
+  const statusCounts = getStatusCounts();
 
-  useBookCopilotActions<Omit<Book, "id">, Book>(addNewBook, editBook,deleteBook, books);
+  useBookCopilotActions<Omit<Book, "id">, Book>(
+    addNewBook,
+    editBook,
+    deleteBook,
+    books
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -265,7 +296,9 @@ export default function BookWebsite() {
               animate={{ scale: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              <span className="text-2xl md:text-3xl lg:text-4xl block mb-2 text-blue-200">Welcome to</span>
+              <span className="text-2xl md:text-3xl lg:text-4xl block mb-2 text-blue-200">
+                Welcome to
+              </span>
               BookVerse
               <br />
               <span className="text-yellow-300">Your Reading Universe</span>
@@ -276,8 +309,8 @@ export default function BookWebsite() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              Curate your personal library, track your reading journey, and explore endless stories in your own
-              BookVerse
+              Curate your personal library, track your reading journey, and
+              explore endless stories in your own BookVerse
             </motion.p>
             <motion.div
               initial={{ y: 30, opacity: 0 }}
@@ -285,7 +318,10 @@ export default function BookWebsite() {
               transition={{ delay: 0.8, duration: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-              <Button size="lg" className="bg-white text-purple-600 hover:bg-blue-50 px-8 py-3 text-lg font-semibold">
+              <Button
+                size="lg"
+                className="bg-white text-purple-600 hover:bg-blue-50 px-8 py-3 text-lg font-semibold"
+              >
                 Start Reading
               </Button>
               <Button
@@ -300,7 +336,7 @@ export default function BookWebsite() {
         </div>
 
         {/* Floating Books Animation */}
-       <FloatingBooks />
+        <FloatingBooks />
       </motion.section>
 
       {/* Main Content */}
@@ -323,7 +359,7 @@ export default function BookWebsite() {
               />
             </div>
 
-            <div className="flex gap-3 items-center">
+            <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto">
               <Select value={selectedGenre} onValueChange={setSelectedGenre}>
                 <SelectTrigger className="w-40 bg-gradient-to-r from-white/90 to-purple-50/90 backdrop-blur-sm border border-purple-200 focus:border-purple-400">
                   <Filter className="w-4 h-4 mr-2 text-purple-500" />
@@ -385,7 +421,11 @@ export default function BookWebsite() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-gradient-to-r from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-900/50 dark:via-blue-900/50 dark:to-indigo-900/50 backdrop-blur-sm border border-white/20 shadow-lg">
               <TabsTrigger
                 value="all"
@@ -394,7 +434,10 @@ export default function BookWebsite() {
                 <BookOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">All Books</span>
                 <span className="sm:hidden">All</span>
-                <Badge variant="secondary" className="ml-1 bg-white/80 text-gray-700">
+                <Badge
+                  variant="secondary"
+                  className="ml-1 bg-white/80 text-gray-700"
+                >
                   {statusCounts.all}
                 </Badge>
               </TabsTrigger>
@@ -405,7 +448,10 @@ export default function BookWebsite() {
                 <Heart className="w-4 h-4" />
                 <span className="hidden sm:inline">Wishlist</span>
                 <span className="sm:hidden">Wish</span>
-                <Badge variant="secondary" className="ml-1 bg-white/80 text-gray-700">
+                <Badge
+                  variant="secondary"
+                  className="ml-1 bg-white/80 text-gray-700"
+                >
                   {statusCounts.wishlist}
                 </Badge>
               </TabsTrigger>
@@ -416,7 +462,10 @@ export default function BookWebsite() {
                 <BookOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">Read Later</span>
                 <span className="sm:hidden">Later</span>
-                <Badge variant="secondary" className="ml-1 bg-white/80 text-gray-700">
+                <Badge
+                  variant="secondary"
+                  className="ml-1 bg-white/80 text-gray-700"
+                >
                   {statusCounts.readLater}
                 </Badge>
               </TabsTrigger>
@@ -427,7 +476,10 @@ export default function BookWebsite() {
                 <CheckCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">Completed</span>
                 <span className="sm:hidden">Done</span>
-                <Badge variant="secondary" className="ml-1 bg-white/80 text-gray-700">
+                <Badge
+                  variant="secondary"
+                  className="ml-1 bg-white/80 text-gray-700"
+                >
                   {statusCounts.read}
                 </Badge>
               </TabsTrigger>
@@ -476,8 +528,8 @@ export default function BookWebsite() {
                                 size="sm"
                                 variant="secondary"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  openEditModal(book)
+                                  e.stopPropagation();
+                                  openEditModal(book);
                                 }}
                                 className="bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-lg p-2 rounded-full"
                               >
@@ -487,8 +539,8 @@ export default function BookWebsite() {
                                 size="sm"
                                 variant="destructive"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  deleteBook(book.id)
+                                  e.stopPropagation();
+                                  deleteBook(book.id);
                                 }}
                                 className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg p-2 rounded-full"
                               >
@@ -499,10 +551,19 @@ export default function BookWebsite() {
                               <div className="flex gap-2">
                                 <Button
                                   size="sm"
-                                  variant={book.status === "wishlist" ? "default" : "secondary"}
+                                  variant={
+                                    book.status === "wishlist"
+                                      ? "default"
+                                      : "secondary"
+                                  }
                                   onClick={(e) => {
-                                    e.stopPropagation()
-                                    updateBookStatus(book.id, book.status === "wishlist" ? "none" : "wishlist")
+                                    e.stopPropagation();
+                                    updateBookStatus(
+                                      book.id,
+                                      book.status === "wishlist"
+                                        ? "none"
+                                        : "wishlist"
+                                    );
                                   }}
                                   className={`flex-1 transition-all duration-300 ${
                                     book.status === "wishlist"
@@ -511,16 +572,29 @@ export default function BookWebsite() {
                                   }`}
                                 >
                                   <Heart
-                                    className={`w-4 h-4 mr-1 ${book.status === "wishlist" ? "fill-current" : ""}`}
+                                    className={`w-4 h-4 mr-1 ${
+                                      book.status === "wishlist"
+                                        ? "fill-current"
+                                        : ""
+                                    }`}
                                   />
                                   Wish
                                 </Button>
                                 <Button
                                   size="sm"
-                                  variant={book.status === "readLater" ? "default" : "secondary"}
+                                  variant={
+                                    book.status === "readLater"
+                                      ? "default"
+                                      : "secondary"
+                                  }
                                   onClick={(e) => {
-                                    e.stopPropagation()
-                                    updateBookStatus(book.id, book.status === "readLater" ? "none" : "readLater")
+                                    e.stopPropagation();
+                                    updateBookStatus(
+                                      book.id,
+                                      book.status === "readLater"
+                                        ? "none"
+                                        : "readLater"
+                                    );
                                   }}
                                   className={`flex-1 transition-all duration-300 ${
                                     book.status === "readLater"
@@ -534,23 +608,36 @@ export default function BookWebsite() {
                               </div>
                             </div>
                           </div>
-                          <CardContent className="p-4 flex-grow flex flex-col" onClick={() => openDetailsModal(book)}>
+                          <CardContent
+                            className="p-4 flex-grow flex flex-col"
+                            onClick={() => openDetailsModal(book)}
+                          >
                             <h3 className="font-bold text-lg mb-1 line-clamp-2 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
                               {book.title}
                             </h3>
                             <p className="text-gray-600 mb-1">{book.author}</p>
-                            <p className="text-gray-500 text-sm mb-2">{book.publisher}</p>
+                            <p className="text-gray-500 text-sm mb-2">
+                              {book.publisher}
+                            </p>
                             <div className="flex items-center gap-2 mb-2">
                               <div className="flex items-center">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span className="ml-1 text-sm font-medium">{book.rating}</span>
+                                <span className="ml-1 text-sm font-medium">
+                                  {book.rating}
+                                </span>
                               </div>
                               <span className="text-gray-400">•</span>
-                              <span className="text-sm text-gray-600">{book.pages} pages</span>
+                              <span className="text-sm text-gray-600">
+                                {book.pages} pages
+                              </span>
                               <span className="text-gray-400">•</span>
-                              <span className="text-sm text-gray-600">{book.language}</span>
+                              <span className="text-sm text-gray-600">
+                                {book.language}
+                              </span>
                             </div>
-                            <p className="text-sm text-gray-600 line-clamp-2 flex-grow">{book.description}</p>
+                            <p className="text-sm text-gray-600 line-clamp-2 flex-grow">
+                              {book.description}
+                            </p>
                           </CardContent>
                           <CardFooter className="p-4 pt-0 mt-auto">
                             <Button
@@ -560,8 +647,11 @@ export default function BookWebsite() {
                                   : "bg-gradient-to-r from-gray-100 to-gray-200 hover:from-purple-500 hover:to-blue-500 hover:text-white text-gray-700 border border-gray-300"
                               }`}
                               onClick={(e) => {
-                                e.stopPropagation()
-                                updateBookStatus(book.id, book.status === "read" ? "none" : "read")
+                                e.stopPropagation();
+                                updateBookStatus(
+                                  book.id,
+                                  book.status === "read" ? "none" : "read"
+                                );
                               }}
                             >
                               {book.status === "read" ? (
@@ -577,18 +667,19 @@ export default function BookWebsite() {
                         </Card>
                       ) : (
                         <Card className="bg-gradient-to-br from-white/90 via-white/80 to-blue-50/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] cursor-pointer">
-                          <CardContent className="p-6" onClick={() => openDetailsModal(book)}>
-                            <div className="flex gap-4">
-                              import Image from 'next/image';
-
-<Image
-  src={book.cover || "/placeholder.svg"}
-  alt={book.title}
-  className="w-20 h-28 object-cover rounded-lg shadow-md"
-  width={80}    // Tailwind w-20 = 5rem = 80px
-  height={112}  // Tailwind h-28 = 7rem = 112px
-  unoptimized   // Optional: use this if the source is untrusted or not in remotePatterns
-/>
+                          <CardContent
+                            className="p-6"
+                            onClick={() => openDetailsModal(book)}
+                          >
+                            <div className="flex gap-4 flex-col sm:flex-row">
+                              <Image
+                                src={book.cover || "/placeholder.svg"}
+                                alt={book.title}
+                                className="w-20 h-28 object-cover rounded-lg shadow-md"
+                                width={80} // Tailwind w-20 = 5rem = 80px
+                                height={112} // Tailwind h-28 = 7rem = 112px
+                                unoptimized // Optional: use this if the source is untrusted or not in remotePatterns
+                              />
 
                               <div className="flex-1">
                                 <div className="flex items-start justify-between mb-2">
@@ -596,8 +687,12 @@ export default function BookWebsite() {
                                     <h3 className="font-bold text-xl mb-1 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                                       {book.title}
                                     </h3>
-                                    <p className="text-gray-600 mb-1">{book.author}</p>
-                                    <p className="text-gray-500 text-sm mb-2">{book.publisher}</p>
+                                    <p className="text-gray-600 mb-1">
+                                      {book.author}
+                                    </p>
+                                    <p className="text-gray-500 text-sm mb-2">
+                                      {book.publisher}
+                                    </p>
                                   </div>
                                   <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
                                     {book.genre}
@@ -606,20 +701,39 @@ export default function BookWebsite() {
                                 <div className="flex items-center gap-4 mb-3">
                                   <div className="flex items-center">
                                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                    <span className="ml-1 font-medium">{book.rating}</span>
+                                    <span className="ml-1 font-medium">
+                                      {book.rating}
+                                    </span>
                                   </div>
-                                  <span className="text-gray-600">{book.pages} pages</span>
-                                  <span className="text-gray-600">{book.publishYear}</span>
-                                  <span className="text-gray-600">{book.language}</span>
+                                  <span className="text-gray-600">
+                                    {book.pages} pages
+                                  </span>
+                                  <span className="text-gray-600">
+                                    {book.publishYear}
+                                  </span>
+                                  <span className="text-gray-600">
+                                    {book.language}
+                                  </span>
                                 </div>
-                                <p className="text-gray-600 mb-4 line-clamp-2">{book.description}</p>
+                                <p className="text-gray-600 mb-4 line-clamp-2">
+                                  {book.description}
+                                </p>
                                 <div className="flex gap-2 flex-wrap">
                                   <Button
                                     size="sm"
-                                    variant={book.status === "wishlist" ? "default" : "outline"}
+                                    variant={
+                                      book.status === "wishlist"
+                                        ? "default"
+                                        : "outline"
+                                    }
                                     onClick={(e) => {
-                                      e.stopPropagation()
-                                      updateBookStatus(book.id, book.status === "wishlist" ? "none" : "wishlist")
+                                      e.stopPropagation();
+                                      updateBookStatus(
+                                        book.id,
+                                        book.status === "wishlist"
+                                          ? "none"
+                                          : "wishlist"
+                                      );
                                     }}
                                     className={`transition-all duration-300 ${
                                       book.status === "wishlist"
@@ -628,16 +742,29 @@ export default function BookWebsite() {
                                     }`}
                                   >
                                     <Heart
-                                      className={`w-4 h-4 mr-1 ${book.status === "wishlist" ? "fill-current" : ""}`}
+                                      className={`w-4 h-4 mr-1 ${
+                                        book.status === "wishlist"
+                                          ? "fill-current"
+                                          : ""
+                                      }`}
                                     />
                                     Wishlist
                                   </Button>
                                   <Button
                                     size="sm"
-                                    variant={book.status === "readLater" ? "default" : "outline"}
+                                    variant={
+                                      book.status === "readLater"
+                                        ? "default"
+                                        : "outline"
+                                    }
                                     onClick={(e) => {
-                                      e.stopPropagation()
-                                      updateBookStatus(book.id, book.status === "readLater" ? "none" : "readLater")
+                                      e.stopPropagation();
+                                      updateBookStatus(
+                                        book.id,
+                                        book.status === "readLater"
+                                          ? "none"
+                                          : "readLater"
+                                      );
                                     }}
                                     className={`transition-all duration-300 ${
                                       book.status === "readLater"
@@ -650,10 +777,17 @@ export default function BookWebsite() {
                                   </Button>
                                   <Button
                                     size="sm"
-                                    variant={book.status === "read" ? "default" : "outline"}
+                                    variant={
+                                      book.status === "read"
+                                        ? "default"
+                                        : "outline"
+                                    }
                                     onClick={(e) => {
-                                      e.stopPropagation()
-                                      updateBookStatus(book.id, book.status === "read" ? "none" : "read")
+                                      e.stopPropagation();
+                                      updateBookStatus(
+                                        book.id,
+                                        book.status === "read" ? "none" : "read"
+                                      );
                                     }}
                                     className={`transition-all duration-300 ${
                                       book.status === "read"
@@ -662,14 +796,16 @@ export default function BookWebsite() {
                                     }`}
                                   >
                                     <CheckCircle className="w-4 h-4 mr-1" />
-                                    {book.status === "read" ? "Completed" : "Mark as Read"}
+                                    {book.status === "read"
+                                      ? "Completed"
+                                      : "Mark as Read"}
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={(e) => {
-                                      e.stopPropagation()
-                                      openEditModal(book)
+                                      e.stopPropagation();
+                                      openEditModal(book);
                                     }}
                                     className="border-blue-300 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-transparent transition-all duration-300"
                                   >
@@ -680,8 +816,8 @@ export default function BookWebsite() {
                                     size="sm"
                                     variant="outline"
                                     onClick={(e) => {
-                                      e.stopPropagation()
-                                      deleteBook(book.id)
+                                      e.stopPropagation();
+                                      deleteBook(book.id);
                                     }}
                                     className="border-red-300 text-red-600 hover:bg-red-500 hover:text-white hover:border-transparent transition-all duration-300"
                                   >
@@ -700,10 +836,18 @@ export default function BookWebsite() {
               </AnimatePresence>
 
               {filteredBooks.length === 0 && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
                   <BookOpen className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No books found</h3>
-                  <p className="text-gray-500">Try adjusting your search or filters</p>
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    No books found
+                  </h3>
+                  <p className="text-gray-500">
+                    Try adjusting your search or filters
+                  </p>
                 </motion.div>
               )}
             </TabsContent>
@@ -746,7 +890,9 @@ export default function BookWebsite() {
                   BookVerse
                 </span>
               </h3>
-              <p className="text-xl text-white font-medium">Your Reading Universe</p>
+              <p className="text-xl text-white font-medium">
+                Your Reading Universe
+              </p>
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -768,12 +914,14 @@ export default function BookWebsite() {
         </div>
       </footer>
       <CopilotPopup
-        instructions={"You are assisting the user as best as you can. Answer in the best way possible given the data you have."}
+        instructions={
+          "You are assisting the user as best as you can. Answer in the best way possible given the data you have."
+        }
         labels={{
           title: "Popup Assistant",
           initial: "Hello, how can I help you today?",
         }}
       />
     </div>
-  )
+  );
 }
