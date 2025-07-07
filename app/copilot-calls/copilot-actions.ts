@@ -38,7 +38,7 @@ export function useBookCopilotActions<
         name: "bookName",
         type: "string",
         description:
-          "The book title, author name, or search keywords the user wants to search for",
+          "The book title the user wants to search for.",
         required: true,
       },
     ],
@@ -63,7 +63,7 @@ export function useBookCopilotActions<
         }
 
         const books = await response.json();
-
+        console.log(books,'BOOKS')
         if (books.length === 0) {
           return "No books found for your search query.";
         }
@@ -95,7 +95,7 @@ export function useBookCopilotActions<
   useCopilotAction({
     name: "addBook",
     description:
-      "IMPORTANT : Call this when the user wants to add a book.Add a new book to the user's BookVerse library with all necessary details. This action completes the book addition process entirely.",
+      "IMPORTANT : Call this when the user wants to add a book. First search for the book using searchBook tool, then add a new book to the user's BookVerse library with all necessary details. This action completes the book addition process entirely. Don't show any unnecessary details and make function calls which are not even defined.",
     parameters: [
       {
         name: "title",
@@ -180,6 +180,57 @@ export function useBookCopilotActions<
       cover = "",
       status = "none",
     }) => {
+
+      // First, search for the book using the search API
+    let searchResults;
+    try {
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: title }),
+      });
+
+      if (response.ok) {
+        searchResults = await response.json();
+      }
+    } catch (error) {
+      console.error("Error searching for book:", error);
+    }
+
+    // Use search results to populate missing fields
+    let bookData = {
+      title: title || "",
+      author: author || "",
+      publisher: publisher || "",
+      genre: genre || "",
+      language: language || "English",
+      rating: rating || 0,
+      pages: pages || 0,
+      publishYear: publishYear || 0,
+      description: description || "",
+      cover: cover || "",
+      status: status || "none",
+    };
+
+    // If we found search results, use the first match to populate missing fields
+    if (searchResults && searchResults.length > 0) {
+      const firstResult = searchResults[0];
+      bookData = {
+        title: title || firstResult.title || "",
+        author: author || firstResult.author || "",
+        publisher: publisher || firstResult.publisher || "",
+        genre: genre || firstResult.genre || "",
+        language: language || firstResult.language || "English",
+        rating: rating || firstResult.rating || 0,
+        pages: pages || firstResult.pages || 0,
+        publishYear: publishYear || firstResult.publishYear || 0,
+        description: description || firstResult.description || "",
+        cover: cover || firstResult.cover || "/placeholder.svg?height=300&width=200",
+        status: status || "none",
+      };
+    }
       // Validate required fields
       if (
         !title ||
@@ -216,6 +267,29 @@ export function useBookCopilotActions<
         );
       }
 
+      // Check for existing books with same title, author, and publish year
+      const existingBooks = (books as any[]).filter(
+        (book) =>
+          book.title?.toLowerCase().trim() === title.toLowerCase().trim() ||
+          book.author?.toLowerCase().trim() === author.toLowerCase().trim()
+      );
+
+      if (existingBooks.length > 0) {
+        const duplicatesList = existingBooks
+          .map(
+            (book) =>
+              `ID: ${book.id} - "${book.title}" by ${book.author} (${book.publishYear})`
+          )
+          .join("\n");
+
+        return `This book already exists in your library!
+
+Existing book(s):
+${duplicatesList}
+
+The book was not added to avoid duplicates. If you want to update the existing book, use the edit function with the book ID.`;
+      }
+
       // Create the book object
       const newBook = {
         title: title.trim(),
@@ -237,6 +311,7 @@ export function useBookCopilotActions<
       return `Successfully added "${title}" by ${author} to your BookVerse library!`;
     },
   });
+
   // useCopilotAction({
   //   name: "editBook",
   //   description:
@@ -437,7 +512,9 @@ Current details:
 - Published: ${book.publishYear || "Not specified"}
 - Status: ${book.status || "none"}
 
-You can now edit or delete  this book depending on what action the user wants to do using the book ID: ${book.id}`;
+You can now edit or delete  this book depending on what action the user wants to do using the book ID: ${
+          book.id
+        }`;
       }
 
       // Multiple matches found
@@ -649,48 +726,48 @@ Please use the exact book ID from the list above.`;
       return `Successfully deleted "${existingBook.title}" by ${existingBook.author} from your BookVerse library!`;
     },
   });
-//   useCopilotAction({
-//     name: "findBookId",
-//     description:
-//       "Find the book ID for a book by searching through the user's library. Use this when the user wants to delete a book but you need to find its ID first.",
-//     parameters: [
-//       {
-//         name: "searchTerm",
-//         type: "string",
-//         description:
-//           "The book title, author name, or keywords to search for in the user's library",
-//         required: true,
-//       },
-//     ],
-//     handler: async ({ searchTerm }) => {
-//       const matchingBooks = (books as any[]).filter(
-//         (book) =>
-//           book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//           book.author?.toLowerCase().includes(searchTerm.toLowerCase())
-//       );
+  //   useCopilotAction({
+  //     name: "findBookId",
+  //     description:
+  //       "Find the book ID for a book by searching through the user's library. Use this when the user wants to delete a book but you need to find its ID first.",
+  //     parameters: [
+  //       {
+  //         name: "searchTerm",
+  //         type: "string",
+  //         description:
+  //           "The book title, author name, or keywords to search for in the user's library",
+  //         required: true,
+  //       },
+  //     ],
+  //     handler: async ({ searchTerm }) => {
+  //       const matchingBooks = (books as any[]).filter(
+  //         (book) =>
+  //           book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //           book.author?.toLowerCase().includes(searchTerm.toLowerCase())
+  //       );
 
-//       if (matchingBooks.length === 0) {
-//         return `No books found matching "${searchTerm}" in your library.`;
-//       }
+  //       if (matchingBooks.length === 0) {
+  //         return `No books found matching "${searchTerm}" in your library.`;
+  //       }
 
-//       if (matchingBooks.length === 1) {
-//         const book = matchingBooks[0];
-//         return `Found book: "${book.title}" by ${book.author}
-// Book ID: ${book.id}
+  //       if (matchingBooks.length === 1) {
+  //         const book = matchingBooks[0];
+  //         return `Found book: "${book.title}" by ${book.author}
+  // Book ID: ${book.id}
 
-// You can now delete this book using the book ID: ${book.id}`;
-//       }
+  // You can now delete this book using the book ID: ${book.id}`;
+  //       }
 
-//       // Multiple matches found
-//       const bookList = matchingBooks
-//         .map((book) => `ID: ${book.id} - "${book.title}" by ${book.author}`)
-//         .join("\n");
+  //       // Multiple matches found
+  //       const bookList = matchingBooks
+  //         .map((book) => `ID: ${book.id} - "${book.title}" by ${book.author}`)
+  //         .join("\n");
 
-//       return `Found ${matchingBooks.length} books matching "${searchTerm}":
+  //       return `Found ${matchingBooks.length} books matching "${searchTerm}":
 
-// ${bookList}
+  // ${bookList}
 
-// Please specify which book you want to delete by using its exact ID.`;
-//     },
-//   });
+  // Please specify which book you want to delete by using its exact ID.`;
+  //     },
+  //   });
 }
