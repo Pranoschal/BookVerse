@@ -1,7 +1,7 @@
 "use client";
 
 import { CopilotPopup } from "@copilotkit/react-ui";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -33,6 +33,7 @@ import FloatingBooks from "@/components/floating-books";
 import Image from "next/image";
 import { useBookCopilotActions } from "./copilot-calls/copilot-actions";
 import { v4 as uuidv4 } from "uuid";
+import fetchAllBooks from "./supabase-actions";
 
 interface Book {
   id: string;
@@ -145,7 +146,17 @@ const sampleBooks: Book[] = [
   },
 ];
 
-export default function BookWebsite() {
+export default async function BookWebsite() {
+
+  useEffect(()=>{
+    const fetchBooks = async()=>{
+      const result = await fetch("/api/supabase/fetchBooks")
+      const resJson = await result.json()
+      const allBooks = resJson.data
+      console.log(allBooks)
+    }
+    fetchBooks()
+  })
   const [books, setBooks] = useState<Book[]>(sampleBooks);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");

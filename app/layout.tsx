@@ -6,6 +6,7 @@ import { CopilotKit } from "@copilotkit/react-core";
 import "@copilotkit/react-ui/styles.css";
 import { BooksProvider } from "./contexts/booksContext";
 
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -17,8 +18,6 @@ export const metadata: Metadata = {
     icon: "/bookverse.png", // Path relative to the public folder
   },
 };
-
-
 
 export default function RootLayout({
   children,
