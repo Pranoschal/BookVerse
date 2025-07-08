@@ -33,7 +33,6 @@ import FloatingBooks from "@/components/floating-books";
 import Image from "next/image";
 import { useBookCopilotActions } from "./copilot-calls/copilot-actions";
 import { v4 as uuidv4 } from "uuid";
-import fetchAllBooks from "./supabase-actions";
 
 interface Book {
   id: string;
