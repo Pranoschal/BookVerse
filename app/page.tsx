@@ -27,12 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import BookModalComponent from "@/components/add-book-modal";
 import BookDetailsModal from "@/components/book-details-modal";
 import FloatingBooks from "@/components/floating-books";
 import Image from "next/image";
 import { useBookCopilotActions } from "./copilot-calls/copilot-actions";
 import { v4 as uuidv4 } from "uuid";
+import HamsterSpinner from "@/components/hamster-spinner";
 
 interface Book {
   id: string;
@@ -49,114 +51,105 @@ interface Book {
   publisher: string;
 }
 
-const sampleBooks: Book[] = [
-  {
-    id: "1",
-    title: "The Midnight Library",
-    author: "Matt Haig",
-    cover: "https://m.media-amazon.com/images/I/81J6APjwxlL.jpg",
-    rating: 4.2,
-    genre: "Fiction",
-    description:
-      "A magical library between life and death where every book represents a different life you could have lived. Nora Seed finds herself in this extraordinary place after feeling like her life has been a series of misfortunes and mistakes. In the Midnight Library, she gets to experience alternate versions of her life - what would have happened if she had made different choices? Each book in the library represents a different path she could have taken, from becoming a rock star to being a glaciologist in the Arctic. As Nora explores these different lives, she begins to understand what it truly means to live and discovers that even the most ordinary life can be extraordinary.",
-    pages: 288,
-    publishYear: 2020,
-    status: "read",
-    language: "English",
-    publisher: "Canongate Books",
-  },
-  {
-    id: "2",
-    title: "Atomic Habits",
-    author: "James Clear",
-    cover:
-      "https://ia801708.us.archive.org/BookReader/BookReaderImages.php?zip=/31/items/atomic-habits/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2.zip&file=Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_0000.jp2&id=atomic-habits&scale=4&rotate=0",
-    rating: 4.8,
-    genre: "Self-Help",
-    description:
-      "An easy and proven way to build good habits and break bad ones. James Clear draws on the most proven ideas from biology, psychology, and neuroscience to create an easy-to-understand guide for making good habits inevitable and bad habits impossible. Along the way, readers will be inspired and entertained with true stories from Olympic gold medalists, award-winning artists, business leaders, life-saving physicians, and star comedians who have used the science of small habits to master their craft and vault to the top of their field.",
-    pages: 320,
-    publishYear: 2018,
-    status: "wishlist",
-    language: "English",
-    publisher: "Avery",
-  },
-  {
-    id: "3",
-    title: "Dune",
-    author: "Frank Herbert",
-    cover:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScEtF9aLVNs4DvwTF0AzHn4mgqaT27YTBRgA&s",
-    rating: 4.5,
-    genre: "Sci-Fi",
-    description:
-      "A sweeping space opera set on the desert planet Arrakis. Paul Atreides, a brilliant and gifted young man born into a great destiny beyond his understanding, must travel to the most dangerous planet in the universe to ensure the future of his family and his people. As malevolent forces explode into conflict over the planet's exclusive supply of the most precious resource in existence—a commodity capable of unlocking humanity's greatest potential—only those who can conquer their fear will survive.",
-    pages: 688,
-    publishYear: 1965,
-    status: "readLater",
-    language: "English",
-    publisher: "Chilton Books",
-  },
-  {
-    id: "4",
-    title: "The Seven Husbands of Evelyn Hugo",
-    author: "Taylor Jenkins Reid",
-    cover: "https://m.media-amazon.com/images/I/81LscKUplaL.jpg",
-    rating: 4.6,
-    genre: "Romance",
-    description:
-      "A reclusive Hollywood icon finally tells her story to a young journalist. Evelyn Hugo is finally ready to tell the truth about her glamorous and scandalous life. But when she chooses unknown magazine reporter Monique Grant for the job, no one is more astounded than Monique herself. Why her? Why now? Monique is not exactly on top of the world. Her husband has left her, and her career has stagnated. Regardless of why Evelyn has selected her to write her biography, Monique is determined to use this opportunity to jumpstart her career.",
-    pages: 400,
-    publishYear: 2017,
-    status: "read",
-    language: "English",
-    publisher: "Atria Books",
-  },
-  {
-    id: "5",
-    title: "Educated",
-    author: "Tara Westover",
-    cover: "https://m.media-amazon.com/images/I/41fkYRj1OwL._SL500_.jpg",
-    rating: 4.4,
-    genre: "Memoir",
-    description:
-      "A memoir about education, transformation, and the price of knowledge. Tara Westover was seventeen the first time she set foot in a classroom. Born to survivalists in the mountains of Idaho, she prepared for the end of the world by stockpiling home-canned peaches and sleeping with her 'head-for-the-hills bag'. In the summer she stewed herbs for her mother, a midwife and healer, and in the winter she salvaged in her father's junkyard. Her father forbade hospitals, so Tara never saw a doctor or nurse. Gashes and concussions, even burns from explosions, were all treated at home with herbalism.",
-    pages: 334,
-    publishYear: 2018,
-    status: "none",
-    language: "English",
-    publisher: "Random House",
-  },
-  {
-    id: "6",
-    title: "The Silent Patient",
-    author: "Alex Michaelides",
-    cover:
-      "https://m.media-amazon.com/images/I/81JJPDNlxSL._UF1000,1000_QL80_.jpg",
-    rating: 4.1,
-    genre: "Thriller",
-    description:
-      "A psychological thriller about a woman who refuses to speak after allegedly murdering her husband. Alicia Berenson's life is seemingly perfect. A famous painter married to an in-demand fashion photographer, she lives in a grand house overlooking a park in one of London's most desirable areas. One evening her husband Gabriel returns home late from a fashion shoot, and Alicia shoots him five times in the face, and then never speaks another word. Alicia's refusal to talk, or give any kind of explanation, turns a domestic tragedy into something far grander, a mystery that captures the public imagination and casts Alicia into notoriety.",
-    pages: 336,
-    publishYear: 2019,
-    status: "readLater",
-    language: "English",
-    publisher: "Celadon Books",
-  },
-];
+// const sampleBooks: Book[] = [
+//   {
+//     id: "1",
+//     title: "The Midnight Library",
+//     author: "Matt Haig",
+//     cover: "https://m.media-amazon.com/images/I/81J6APjwxlL.jpg",
+//     rating: 4.2,
+//     genre: "Fiction",
+//     description:
+//       "A magical library between life and death where every book represents a different life you could have lived. Nora Seed finds herself in this extraordinary place after feeling like her life has been a series of misfortunes and mistakes. In the Midnight Library, she gets to experience alternate versions of her life - what would have happened if she had made different choices? Each book in the library represents a different path she could have taken, from becoming a rock star to being a glaciologist in the Arctic. As Nora explores these different lives, she begins to understand what it truly means to live and discovers that even the most ordinary life can be extraordinary.",
+//     pages: 288,
+//     publishYear: 2020,
+//     status: "read",
+//     language: "English",
+//     publisher: "Canongate Books",
+//   },
+//   {
+//     id: "2",
+//     title: "Atomic Habits",
+//     author: "James Clear",
+//     cover:
+//       "https://ia801708.us.archive.org/BookReader/BookReaderImages.php?zip=/31/items/atomic-habits/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2.zip&file=Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_jp2/Atomic%20Habits%20-%20An%20Easy%20%26%20Proven%20Way%20To%20Build%20Good%20Habits%20%26%20Break%20Bad%20Ones_0000.jp2&id=atomic-habits&scale=4&rotate=0",
+//     rating: 4.8,
+//     genre: "Self-Help",
+//     description:
+//       "An easy and proven way to build good habits and break bad ones. James Clear draws on the most proven ideas from biology, psychology, and neuroscience to create an easy-to-understand guide for making good habits inevitable and bad habits impossible. Along the way, readers will be inspired and entertained with true stories from Olympic gold medalists, award-winning artists, business leaders, life-saving physicians, and star comedians who have used the science of small habits to master their craft and vault to the top of their field.",
+//     pages: 320,
+//     publishYear: 2018,
+//     status: "wishlist",
+//     language: "English",
+//     publisher: "Avery",
+//   },
+//   {
+//     id: "3",
+//     title: "Dune",
+//     author: "Frank Herbert",
+//     cover:
+//       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScEtF9aLVNs4DvwTF0AzHn4mgqaT27YTBRgA&s",
+//     rating: 4.5,
+//     genre: "Sci-Fi",
+//     description:
+//       "A sweeping space opera set on the desert planet Arrakis. Paul Atreides, a brilliant and gifted young man born into a great destiny beyond his understanding, must travel to the most dangerous planet in the universe to ensure the future of his family and his people. As malevolent forces explode into conflict over the planet's exclusive supply of the most precious resource in existence—a commodity capable of unlocking humanity's greatest potential—only those who can conquer their fear will survive.",
+//     pages: 688,
+//     publishYear: 1965,
+//     status: "readLater",
+//     language: "English",
+//     publisher: "Chilton Books",
+//   },
+//   {
+//     id: "4",
+//     title: "The Seven Husbands of Evelyn Hugo",
+//     author: "Taylor Jenkins Reid",
+//     cover: "https://m.media-amazon.com/images/I/81LscKUplaL.jpg",
+//     rating: 4.6,
+//     genre: "Romance",
+//     description:
+//       "A reclusive Hollywood icon finally tells her story to a young journalist. Evelyn Hugo is finally ready to tell the truth about her glamorous and scandalous life. But when she chooses unknown magazine reporter Monique Grant for the job, no one is more astounded than Monique herself. Why her? Why now? Monique is not exactly on top of the world. Her husband has left her, and her career has stagnated. Regardless of why Evelyn has selected her to write her biography, Monique is determined to use this opportunity to jumpstart her career.",
+//     pages: 400,
+//     publishYear: 2017,
+//     status: "read",
+//     language: "English",
+//     publisher: "Atria Books",
+//   },
+//   {
+//     id: "5",
+//     title: "Educated",
+//     author: "Tara Westover",
+//     cover: "https://m.media-amazon.com/images/I/41fkYRj1OwL._SL500_.jpg",
+//     rating: 4.4,
+//     genre: "Memoir",
+//     description:
+//       "A memoir about education, transformation, and the price of knowledge. Tara Westover was seventeen the first time she set foot in a classroom. Born to survivalists in the mountains of Idaho, she prepared for the end of the world by stockpiling home-canned peaches and sleeping with her 'head-for-the-hills bag'. In the summer she stewed herbs for her mother, a midwife and healer, and in the winter she salvaged in her father's junkyard. Her father forbade hospitals, so Tara never saw a doctor or nurse. Gashes and concussions, even burns from explosions, were all treated at home with herbalism.",
+//     pages: 334,
+//     publishYear: 2018,
+//     status: "none",
+//     language: "English",
+//     publisher: "Random House",
+//   },
+//   {
+//     id: "6",
+//     title: "The Silent Patient",
+//     author: "Alex Michaelides",
+//     cover:
+//       "https://m.media-amazon.com/images/I/81JJPDNlxSL._UF1000,1000_QL80_.jpg",
+//     rating: 4.1,
+//     genre: "Thriller",
+//     description:
+//       "A psychological thriller about a woman who refuses to speak after allegedly murdering her husband. Alicia Berenson's life is seemingly perfect. A famous painter married to an in-demand fashion photographer, she lives in a grand house overlooking a park in one of London's most desirable areas. One evening her husband Gabriel returns home late from a fashion shoot, and Alicia shoots him five times in the face, and then never speaks another word. Alicia's refusal to talk, or give any kind of explanation, turns a domestic tragedy into something far grander, a mystery that captures the public imagination and casts Alicia into notoriety.",
+//     pages: 336,
+//     publishYear: 2019,
+//     status: "readLater",
+//     language: "English",
+//     publisher: "Celadon Books",
+//   },
+// ];
 
 export default async function BookWebsite() {
 
-  useEffect(()=>{
-    const fetchBooks = async()=>{
-      const result = await fetch("/api/supabase/fetchBooks")
-      const resJson = await result.json()
-      const allBooks = resJson.data
-      console.log(allBooks)
-    }
-    fetchBooks()
-  })
-  const [books, setBooks] = useState<Book[]>(sampleBooks);
+  const [books, setBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -166,6 +159,49 @@ export default async function BookWebsite() {
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setIsLoading(true);
+      try {
+        const result = await fetch("/api/supabase/fetchBooks");
+
+        if (!result.ok) {
+          throw new Error(`HTTP error! status: ${result.status}`);
+        }
+
+        const resJson = await result.json();
+        const allBooks = resJson.data;
+        
+        setBooks(allBooks)
+      } catch (error) {
+        console.error("Error fetching books:", error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch books. Please try again.";
+        toast("Error fetching books", {
+          description: `${errorMessage}`,
+          className:
+            "bg-gradient-to-r from-red-500/90 to-pink-500/90 backdrop-blur-md border border-red-300/30 text-white shadow-2xl",
+          descriptionClassName: "text-red-100",
+          style: {
+            background:
+              "linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(236, 72, 153, 0.9) 100%)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(248, 113, 113, 0.3)",
+            boxShadow:
+              "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+          },
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   const genres = useMemo(() => {
     const allGenres = books.map((book) => book.genre);
@@ -495,7 +531,7 @@ export default async function BookWebsite() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value={activeTab} className="mt-8">
+            <TabsContent value={activeTab} className="mt-16">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -508,233 +544,70 @@ export default async function BookWebsite() {
                       ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                       : "space-y-4"
                   }
-                >
-                  {filteredBooks.map((book, index) => (
-                    <motion.div
-                      key={book.id}
-                      initial={{ opacity: 0, y: 50 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
-                      whileHover={{ y: -5 }}
-                      className="group"
-                    >
-                      {viewMode === "grid" ? (
-                        <Card className="overflow-hidden bg-gradient-to-br from-white/90 via-white/80 to-blue-50/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-[1.02] h-full flex flex-col cursor-pointer">
-                          <div className="relative overflow-hidden flex-shrink-0">
-                            <img
-                              src={book.cover || "/placeholder.svg"}
-                              alt={book.title}
-                              className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110 bg-gray-200"
-                              onClick={() => openDetailsModal(book)}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <div className="absolute top-3 right-3 flex gap-2">
-                              <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 shadow-lg">
-                                {book.genre}
-                              </Badge>
-                            </div>
-                            <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openEditModal(book);
-                                }}
-                                className="bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-lg p-2 rounded-full"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteBook(book.id);
-                                }}
-                                className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg p-2 rounded-full"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                            <div className="absolute bottom-3 left-3 right-3 opacity-0 transform translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant={
-                                    book.status === "wishlist"
-                                      ? "default"
-                                      : "secondary"
-                                  }
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateBookStatus(
-                                      book.id,
-                                      book.status === "wishlist"
-                                        ? "none"
-                                        : "wishlist"
-                                    );
-                                  }}
-                                  className={`flex-1 transition-all duration-300 ${
-                                    book.status === "wishlist"
-                                      ? "bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 shadow-lg"
-                                      : "bg-white/90 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white text-gray-800 border border-white/50"
-                                  }`}
-                                >
-                                  <Heart
-                                    className={`w-4 h-4 mr-1 ${
-                                      book.status === "wishlist"
-                                        ? "fill-current"
-                                        : ""
-                                    }`}
-                                  />
-                                  Wish
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant={
-                                    book.status === "readLater"
-                                      ? "default"
-                                      : "secondary"
-                                  }
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateBookStatus(
-                                      book.id,
-                                      book.status === "readLater"
-                                        ? "none"
-                                        : "readLater"
-                                    );
-                                  }}
-                                  className={`flex-1 transition-all duration-300 ${
-                                    book.status === "readLater"
-                                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-lg"
-                                      : "bg-white/90 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500 hover:text-white text-gray-800 border border-white/50"
-                                  }`}
-                                >
-                                  <BookOpen className="w-4 h-4 mr-1" />
-                                  Later
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                          <CardContent
-                            className="p-4 flex-grow flex flex-col"
-                            onClick={() => openDetailsModal(book)}
-                          >
-                            <h3 className="font-bold text-lg mb-1 line-clamp-2 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
-                              {book.title}
-                            </h3>
-                            <p className="text-gray-600 mb-1">{book.author}</p>
-                            <p className="text-gray-500 text-sm mb-2">
-                              {book.publisher}
-                            </p>
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="flex items-center">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span className="ml-1 text-sm font-medium">
-                                  {book.rating}
-                                </span>
-                              </div>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-sm text-gray-600">
-                                {book.pages} pages
-                              </span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-sm text-gray-600">
-                                {book.language}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 line-clamp-2 flex-grow">
-                              {book.description}
-                            </p>
-                          </CardContent>
-                          <CardFooter className="p-4 pt-0 mt-auto">
-                            <Button
-                              className={`w-full transition-all duration-300 ${
-                                book.status === "read"
-                                  ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg"
-                                  : "bg-gradient-to-r from-gray-100 to-gray-200 hover:from-purple-500 hover:to-blue-500 hover:text-white text-gray-700 border border-gray-300"
-                              }`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateBookStatus(
-                                  book.id,
-                                  book.status === "read" ? "none" : "read"
-                                );
-                              }}
-                            >
-                              {book.status === "read" ? (
-                                <>
-                                  <CheckCircle className="w-4 h-4 mr-2" />
-                                  Completed
-                                </>
-                              ) : (
-                                "Mark as Read"
-                              )}
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      ) : (
-                        <Card className="bg-gradient-to-br from-white/90 via-white/80 to-blue-50/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] cursor-pointer">
-                          <CardContent
-                            className="p-6"
-                            onClick={() => openDetailsModal(book)}
-                          >
-                            <div className="flex gap-4 flex-col sm:flex-row">
-                              <Image
+                >{isLoading ? (
+                  <div className="col-span-full flex flex-col justify-center items-center space-y-4">
+                    <HamsterSpinner size="lg" showText loadingText="Fetching your library..." />
+                    <p className="text-sm text-gray-500">This will complete in a few seconds...</p>
+                  </div>
+                ) : (
+                  <>
+                    {filteredBooks &&
+                    filteredBooks.map((book, index) => (
+                      <motion.div
+                        key={book.id}
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                        whileHover={{ y: -5 }}
+                        className="group"
+                      >
+                        {viewMode === "grid" ? (
+                          <Card className="overflow-hidden bg-gradient-to-br from-white/90 via-white/80 to-blue-50/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-[1.02] h-full flex flex-col cursor-pointer">
+                            <div className="relative overflow-hidden flex-shrink-0">
+                              <img
                                 src={book.cover || "/placeholder.svg"}
                                 alt={book.title}
-                                className="w-20 h-28 object-cover rounded-lg shadow-md"
-                                width={80} // Tailwind w-20 = 5rem = 80px
-                                height={112} // Tailwind h-28 = 7rem = 112px
-                                unoptimized // Optional: use this if the source is untrusted or not in remotePatterns
+                                className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110 bg-gray-200"
+                                onClick={() => openDetailsModal(book)}
                               />
-
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div>
-                                    <h3 className="font-bold text-xl mb-1 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                                      {book.title}
-                                    </h3>
-                                    <p className="text-gray-600 mb-1">
-                                      {book.author}
-                                    </p>
-                                    <p className="text-gray-500 text-sm mb-2">
-                                      {book.publisher}
-                                    </p>
-                                  </div>
-                                  <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
-                                    {book.genre}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-4 mb-3">
-                                  <div className="flex items-center">
-                                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                    <span className="ml-1 font-medium">
-                                      {book.rating}
-                                    </span>
-                                  </div>
-                                  <span className="text-gray-600">
-                                    {book.pages} pages
-                                  </span>
-                                  <span className="text-gray-600">
-                                    {book.publishYear}
-                                  </span>
-                                  <span className="text-gray-600">
-                                    {book.language}
-                                  </span>
-                                </div>
-                                <p className="text-gray-600 mb-4 line-clamp-2">
-                                  {book.description}
-                                </p>
-                                <div className="flex gap-2 flex-wrap">
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              <div className="absolute top-3 right-3 flex gap-2">
+                                <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 shadow-lg">
+                                  {book.genre}
+                                </Badge>
+                              </div>
+                              <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditModal(book);
+                                  }}
+                                  className="bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-lg p-2 rounded-full"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteBook(book.id);
+                                  }}
+                                  className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg p-2 rounded-full"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <div className="absolute bottom-3 left-3 right-3 opacity-0 transform translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <div className="flex gap-2">
                                   <Button
                                     size="sm"
                                     variant={
                                       book.status === "wishlist"
                                         ? "default"
-                                        : "outline"
+                                        : "secondary"
                                     }
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -745,10 +618,10 @@ export default async function BookWebsite() {
                                           : "wishlist"
                                       );
                                     }}
-                                    className={`transition-all duration-300 ${
+                                    className={`flex-1 transition-all duration-300 ${
                                       book.status === "wishlist"
-                                        ? "bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0"
-                                        : "border-pink-300 text-pink-600 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white hover:border-transparent"
+                                        ? "bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 shadow-lg"
+                                        : "bg-white/90 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white text-gray-800 border border-white/50"
                                     }`}
                                   >
                                     <Heart
@@ -758,14 +631,14 @@ export default async function BookWebsite() {
                                           : ""
                                       }`}
                                     />
-                                    Wishlist
+                                    Wish
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant={
                                       book.status === "readLater"
                                         ? "default"
-                                        : "outline"
+                                        : "secondary"
                                     }
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -776,76 +649,253 @@ export default async function BookWebsite() {
                                           : "readLater"
                                       );
                                     }}
-                                    className={`transition-all duration-300 ${
+                                    className={`flex-1 transition-all duration-300 ${
                                       book.status === "readLater"
-                                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0"
-                                        : "border-emerald-300 text-emerald-600 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500 hover:text-white hover:border-transparent"
+                                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-lg"
+                                        : "bg-white/90 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500 hover:text-white text-gray-800 border border-white/50"
                                     }`}
                                   >
                                     <BookOpen className="w-4 h-4 mr-1" />
-                                    Read Later
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant={
-                                      book.status === "read"
-                                        ? "default"
-                                        : "outline"
-                                    }
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      updateBookStatus(
-                                        book.id,
-                                        book.status === "read" ? "none" : "read"
-                                      );
-                                    }}
-                                    className={`transition-all duration-300 ${
-                                      book.status === "read"
-                                        ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0"
-                                        : "border-green-300 text-green-600 hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-500 hover:text-white hover:border-transparent"
-                                    }`}
-                                  >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                    {book.status === "read"
-                                      ? "Completed"
-                                      : "Mark as Read"}
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openEditModal(book);
-                                    }}
-                                    className="border-blue-300 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-transparent transition-all duration-300"
-                                  >
-                                    <Edit className="w-4 h-4 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      deleteBook(book.id);
-                                    }}
-                                    className="border-red-300 text-red-600 hover:bg-red-500 hover:text-white hover:border-transparent transition-all duration-300"
-                                  >
-                                    <X className="w-4 h-4 mr-1" />
-                                    Delete
+                                    Later
                                   </Button>
                                 </div>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </motion.div>
-                  ))}
+                            <CardContent
+                              className="p-4 flex-grow flex flex-col"
+                              onClick={() => openDetailsModal(book)}
+                            >
+                              <h3 className="font-bold text-lg mb-1 line-clamp-2 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                                {book.title}
+                              </h3>
+                              <p className="text-gray-600 mb-1">
+                                {book.author}
+                              </p>
+                              <p className="text-gray-500 text-sm mb-2">
+                                {book.publisher}
+                              </p>
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center">
+                                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                  <span className="ml-1 text-sm font-medium">
+                                    {book.rating}
+                                  </span>
+                                </div>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-sm text-gray-600">
+                                  {book.pages} pages
+                                </span>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-sm text-gray-600">
+                                  {book.language}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600 line-clamp-2 flex-grow">
+                                {book.description}
+                              </p>
+                            </CardContent>
+                            <CardFooter className="p-4 pt-0 mt-auto">
+                              <Button
+                                className={`w-full transition-all duration-300 ${
+                                  book.status === "read"
+                                    ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg"
+                                    : "bg-gradient-to-r from-gray-100 to-gray-200 hover:from-purple-500 hover:to-blue-500 hover:text-white text-gray-700 border border-gray-300"
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateBookStatus(
+                                    book.id,
+                                    book.status === "read" ? "none" : "read"
+                                  );
+                                }}
+                              >
+                                {book.status === "read" ? (
+                                  <>
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Completed
+                                  </>
+                                ) : (
+                                  "Mark as Read"
+                                )}
+                              </Button>
+                            </CardFooter>
+                          </Card>
+                        ) : (
+                          <Card className="bg-gradient-to-br from-white/90 via-white/80 to-blue-50/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] cursor-pointer">
+                            <CardContent
+                              className="p-6"
+                              onClick={() => openDetailsModal(book)}
+                            >
+                              <div className="flex gap-4 flex-col sm:flex-row">
+                                <Image
+                                  src={book.cover || "/placeholder.svg"}
+                                  alt={book.title}
+                                  className="w-20 h-28 object-cover rounded-lg shadow-md"
+                                  width={80} // Tailwind w-20 = 5rem = 80px
+                                  height={112} // Tailwind h-28 = 7rem = 112px
+                                  unoptimized // Optional: use this if the source is untrusted or not in remotePatterns
+                                />
+
+                                <div className="flex-1">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div>
+                                      <h3 className="font-bold text-xl mb-1 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                                        {book.title}
+                                      </h3>
+                                      <p className="text-gray-600 mb-1">
+                                        {book.author}
+                                      </p>
+                                      <p className="text-gray-500 text-sm mb-2">
+                                        {book.publisher}
+                                      </p>
+                                    </div>
+                                    <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
+                                      {book.genre}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-4 mb-3">
+                                    <div className="flex items-center">
+                                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                      <span className="ml-1 font-medium">
+                                        {book.rating}
+                                      </span>
+                                    </div>
+                                    <span className="text-gray-600">
+                                      {book.pages} pages
+                                    </span>
+                                    <span className="text-gray-600">
+                                      {book.publishYear}
+                                    </span>
+                                    <span className="text-gray-600">
+                                      {book.language}
+                                    </span>
+                                  </div>
+                                  <p className="text-gray-600 mb-4 line-clamp-2">
+                                    {book.description}
+                                  </p>
+                                  <div className="flex gap-2 flex-wrap">
+                                    <Button
+                                      size="sm"
+                                      variant={
+                                        book.status === "wishlist"
+                                          ? "default"
+                                          : "outline"
+                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        updateBookStatus(
+                                          book.id,
+                                          book.status === "wishlist"
+                                            ? "none"
+                                            : "wishlist"
+                                        );
+                                      }}
+                                      className={`transition-all duration-300 ${
+                                        book.status === "wishlist"
+                                          ? "bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0"
+                                          : "border-pink-300 text-pink-600 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white hover:border-transparent"
+                                      }`}
+                                    >
+                                      <Heart
+                                        className={`w-4 h-4 mr-1 ${
+                                          book.status === "wishlist"
+                                            ? "fill-current"
+                                            : ""
+                                        }`}
+                                      />
+                                      Wishlist
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant={
+                                        book.status === "readLater"
+                                          ? "default"
+                                          : "outline"
+                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        updateBookStatus(
+                                          book.id,
+                                          book.status === "readLater"
+                                            ? "none"
+                                            : "readLater"
+                                        );
+                                      }}
+                                      className={`transition-all duration-300 ${
+                                        book.status === "readLater"
+                                          ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0"
+                                          : "border-emerald-300 text-emerald-600 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500 hover:text-white hover:border-transparent"
+                                      }`}
+                                    >
+                                      <BookOpen className="w-4 h-4 mr-1" />
+                                      Read Later
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant={
+                                        book.status === "read"
+                                          ? "default"
+                                          : "outline"
+                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        updateBookStatus(
+                                          book.id,
+                                          book.status === "read"
+                                            ? "none"
+                                            : "read"
+                                        );
+                                      }}
+                                      className={`transition-all duration-300 ${
+                                        book.status === "read"
+                                          ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0"
+                                          : "border-green-300 text-green-600 hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-500 hover:text-white hover:border-transparent"
+                                      }`}
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      {book.status === "read"
+                                        ? "Completed"
+                                        : "Mark as Read"}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditModal(book);
+                                      }}
+                                      className="border-blue-300 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-transparent transition-all duration-300"
+                                    >
+                                      <Edit className="w-4 h-4 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteBook(book.id);
+                                      }}
+                                      className="border-red-300 text-red-600 hover:bg-red-500 hover:text-white hover:border-transparent transition-all duration-300"
+                                    >
+                                      <X className="w-4 h-4 mr-1" />
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </motion.div>
+                    ))}
+                  </>
+                )}
+                  
                 </motion.div>
               </AnimatePresence>
 
-              {filteredBooks.length === 0 && (
+              {/* {filteredBooks.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -856,10 +906,11 @@ export default async function BookWebsite() {
                     No books found
                   </h3>
                   <p className="text-gray-500">
-                    Try adjusting your search or filters
+                    Add books to your library or try adjusting your search or
+                    filters.
                   </p>
                 </motion.div>
-              )}
+              )} */}
             </TabsContent>
           </Tabs>
         </motion.div>
@@ -886,7 +937,7 @@ export default async function BookWebsite() {
       />
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-gray-900 via-purple-900/50 to-blue-900/50 text-white py-12 mt-20">
+      <footer className="bg-gradient-to-r from-gray-900 via-purple-900/50 to-blue-900/50 text-white py-12 mt-4">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <motion.div

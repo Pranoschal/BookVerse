@@ -5,6 +5,7 @@ import "./globals.css";
 import { CopilotKit } from "@copilotkit/react-core";
 import "@copilotkit/react-ui/styles.css";
 import { BooksProvider } from "./contexts/booksContext";
+import { Toaster } from "sonner";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -30,6 +31,7 @@ export default function RootLayout({
         <BooksProvider>
           <CopilotKit runtimeUrl="/api/copilotkit">{children}</CopilotKit>
         </BooksProvider>
+        <Toaster />
       </body>
     </html>
   );
