@@ -39,6 +39,8 @@ import {
   AddNewBook,
   ModalMode
 } from "@/types-interfaces/types";
+import { AssistantMessage } from "@/components/copilotkitpopup/assistant-message";
+import { UserMessage } from "@/components/copilotkitpopup/user-message";
 
 export default function BookWebsite() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -351,6 +353,8 @@ export default function BookWebsite() {
           title: "Popup Assistant",
           initial: "Hello, how can I help you today?",
         }}
+        UserMessage={UserMessage}
+        AssistantMessage={AssistantMessage}
       />
     </div>
   );
