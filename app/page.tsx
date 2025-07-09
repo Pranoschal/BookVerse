@@ -58,54 +58,50 @@ export default function BookWebsite() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  const handleOpenPopup = () => {
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = (open: boolean) => {
-    setIsPopupOpen(open);
-  };
   useEffect(() => {
-    const fetchBooks = async () => {
-      setIsLoading(true);
-      try {
-        const result = await fetch("/api/supabase/fetchBooks");
+  const fetchBooks = async () => {
+    setIsLoading(true);
+    try {
+      const result = await fetch("/api/supabase/fetchBooks");
 
-        if (!result.ok) {
-          throw new Error(`HTTP error! status: ${result.status}`);
-        }
-
-        const resJson = await result.json();
-        const allBooks = resJson.data;
-
-        setBooks(allBooks);
-      } catch (error) {
-        console.error("Error fetching books:", error);
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch books. Please try again.";
-        toast("Error fetching books", {
-          description: `${errorMessage}`,
-          className:
-            "bg-gradient-to-r from-red-500/90 to-pink-500/90 backdrop-blur-md border border-red-300/30 text-white shadow-2xl",
-          descriptionClassName: "text-red-100",
-          style: {
-            background:
-              "linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(236, 72, 153, 0.9) 100%)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(248, 113, 113, 0.3)",
-            boxShadow:
-              "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
-          },
-        });
-      } finally {
-        setIsLoading(false);
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`);
       }
-    };
 
-    fetchBooks();
-  }, []);
+      const resJson = await result.json();
+      const allBooks = resJson.data;
+
+      // Add 5-second timeout to see loading icon
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      setBooks(allBooks);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch books. Please try again.";
+      toast("Error fetching books", {
+        description: `${errorMessage}`,
+        className:
+          "bg-gradient-to-r from-red-500/90 to-pink-500/90 backdrop-blur-md border border-red-300/30 text-white shadow-2xl",
+        descriptionClassName: "text-red-100",
+        style: {
+          background:
+            "linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(236, 72, 153, 0.9) 100%)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(248, 113, 113, 0.3)",
+          boxShadow:
+            "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchBooks();
+}, []);
 
   const genres : string[] = useMemo(() => {
     const allGenres = books.map((book) => book.genre);
