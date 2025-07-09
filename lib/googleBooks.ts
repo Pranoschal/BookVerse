@@ -7,6 +7,7 @@ export interface Book {
   genre: string;
   description: string;
   pages: number;
+  publisher : string
   publishYear: number;
   status: 'read' | 'unread';
   language: string;
@@ -70,6 +71,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
       genre: info.categories?.[0] || 'Unknown Genre',
       description: info.description || 'No description available.',
       pages: info.pageCount ?? 0,
+      publisher : info.publisher || 'Unknown Publisher',
       publishYear: info.publishedDate
         ? parseInt(info.publishedDate.substring(0, 4))
         : 0,

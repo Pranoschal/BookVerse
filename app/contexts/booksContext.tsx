@@ -1,9 +1,10 @@
 "use client"
 
+import { Book } from "@/lib/googleBooks";
 import { createContext, useContext, useState, ReactNode } from "react"
 
 type BooksContextType = {
-    books: any[];
+    books: Book[];
     setBooks: (books: any[]) => void;
 }
 
@@ -18,7 +19,7 @@ export const useBooks = () => {
 }
 
 export const BooksProvider = ({ children }: { children: ReactNode }) => {
-    const [books, setBooks] = useState<any[]>([])
+    const [books, setBooks] = useState<Book[]>([]);
 
     return (
         <BooksContext.Provider value={{ books, setBooks }}>
