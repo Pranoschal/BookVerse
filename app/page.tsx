@@ -1,7 +1,7 @@
 "use client";
 
 import { CopilotPopup } from "@copilotkit/react-ui";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -41,6 +41,8 @@ import {
 } from "@/types-interfaces/types";
 import { AssistantMessage } from "@/components/copilotkitpopup/assistant-message";
 import { UserMessage } from "@/components/copilotkitpopup/user-message";
+import { ChatHeader } from "@/components/copilotkitpopup/header";
+import { ChatButton } from "@/components/copilotkitpopup/chat-button";
 
 export default function BookWebsite() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -54,7 +56,15 @@ export default function BookWebsite() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+  const handleOpenPopup = () => {
+    setIsPopupOpen(true);
+  };
+
+  const handleClosePopup = (open: boolean) => {
+    setIsPopupOpen(open);
+  };
   useEffect(() => {
     const fetchBooks = async () => {
       setIsLoading(true);
@@ -353,8 +363,10 @@ export default function BookWebsite() {
           title: "Popup Assistant",
           initial: "Hello, how can I help you today?",
         }}
-        UserMessage={UserMessage}
-        AssistantMessage={AssistantMessage}
+      UserMessage={UserMessage}
+      AssistantMessage={AssistantMessage}
+      Header={ChatHeader}
+      // Button={() => <ChatButton onClick={handleOpenPopup} />} 
       />
     </div>
   );
