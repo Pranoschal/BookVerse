@@ -7,7 +7,7 @@ import {
 import { NextRequest } from 'next/server';
  
 
-const serviceAdapter = new GroqAdapter({ model: "meta-llama/llama-4-scout-17b-16e-instruct" });
+const serviceAdapter = new GroqAdapter({ model: "qwen-qwq-32b" });
 const runtime = new CopilotRuntime();
  
 export const POST = async (req: NextRequest) => {

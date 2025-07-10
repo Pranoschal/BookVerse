@@ -9,8 +9,6 @@ import { BookOpen, CheckCircle, Edit, Heart, Star, X } from "lucide-react";
 import { Badge } from "./ui/badge";
 import HamsterSpinner from "./hamster-spinner";
 import Image from "next/image";
-import { useBooks } from "@/app/contexts/booksContext";
-import { toast } from "sonner";
 import { ViewMode,StatusCounts,Book,VoidFunc,BookFunc,BookIdFunc, UpdateBookStatus, SetActiveTab } from "@/types-interfaces/types";
 import { ActiveTab } from '../types-interfaces/types';
 

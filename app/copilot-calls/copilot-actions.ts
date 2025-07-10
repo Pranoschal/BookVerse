@@ -1,7 +1,6 @@
-import { Book } from "@/lib/googleBooks";
+
 import { useCopilotAction } from "@copilotkit/react-core";
 import { useCopilotReadable } from "@copilotkit/react-core";
-import { searchBooks } from "@/lib/googleBooks";
 
 // Add this to your page.tsx component (inside the component function)
 export function useBookCopilotActions<
@@ -126,14 +125,14 @@ export function useBookCopilotActions<
         name: "language",
         type: "string",
         description: "The language the book is written in (default: English)",
-        required: false,
+        required: true,
       },
       {
         name: "rating",
         type: "number",
         description:
           "User's rating for the book (0-5 scale, can be decimal like 4.5)",
-        required: false,
+        required: true,
       },
       {
         name: "pages",
@@ -157,14 +156,14 @@ export function useBookCopilotActions<
         name: "cover",
         type: "string",
         description: "URL to the book's cover image",
-        required: false,
+        required: true,
       },
       {
         name: "status",
         type: "string",
         description:
-          "Reading status: 'none', 'wishlist', 'readLater', or 'read'",
-        required: false,
+          "Reading status of the book, IMPORTANT : can be either 'none', 'wishlist', 'readLater', or 'read' , and nothing else apart from these four.",
+        required: true,
       },
     ],
     handler: async ({
@@ -181,6 +180,7 @@ export function useBookCopilotActions<
       status = "none",
     }) => {
 
+      console.log(status,'STATUS IN THE BEGINNING')
       // First, search for the book using the search API
     let searchResults;
     try {
@@ -302,9 +302,10 @@ The book was not added to avoid duplicates. If you want to update the existing b
         publishYear,
         description: description.trim(),
         cover: cover.trim() || "/placeholder.svg?height=300&width=200",
-        status: status as "read" | "unread",
+        status: status as "none" | "wishlist" | "readLater" | "read",
       };
 
+      console.log(newBook)
       // Add the book
       addNewBook(newBook as TAdd);
 

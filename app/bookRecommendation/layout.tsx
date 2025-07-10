@@ -10,9 +10,7 @@ export default function RootLayout({
 }) {
   return (
     <div>
-        <BooksProvider>
           <CopilotKit runtimeUrl="/api/copilotkit">{children}</CopilotKit>
-        </BooksProvider>
     </div>
   );
 }

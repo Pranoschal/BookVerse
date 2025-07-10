@@ -1,5 +1,7 @@
 "use client";
 
+import { v4 as uuidv4 } from 'uuid';
+import { AddNewBook, Book } from "@/types-interfaces/types";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, BookOpen, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useBooks } from "../contexts/booksContext";
 import {
   useCopilotAction,
   useCopilotReadable,
@@ -16,241 +19,147 @@ import {
 import { Role, TextMessage } from "@copilotkit/runtime-client-gql";
 import Footer from "@/components/footer";
 
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  cover: string;
-  rating: number;
-  genre: string;
-  description: string;
-  pages: number;
-  publisher: string;
-  publishYear: number;
-  status: "none" | "wishlist" | "readLater" | "read";
-  language: string;
-}
+
+
 
 export default function BookRecommendationPage() {
+
+  const {addNewBook} = useBooks()
   const [genre, setGenre] = useState("Fiction");
   const [interests, setInterests] = useState("Reading");
   const [recommendations, setRecommendations] = useState<Book[]>([]);
   //   const [isLoading, setIsLoading] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
 
-  const { appendMessage, isLoading,visibleMessages } = useCopilotChat();
+  const { appendMessage,stopGeneration } = useCopilotChat();
+  const [isLoading, setIsLoading] = useState(false)
 
-  useCopilotReadable({
-  description: "User's current book preferences and page state",
-  value: {
-    genre,
-    interests,
-    hasRecommendations: showRecommendations,
-    currentRecommendations: recommendations,
-    instructions: "IMPORTANT: When the user asks for book recommendations, you MUST call the displayBookRecommendations function with an array of book titles. Always use this function instead of providing text responses.",
-  },
-});
+  //   useCopilotReadable({
+  //   description: "User's current book preferences and page state",
+  //   value: {
+  //     genre,
+  //     interests,
+  //     hasRecommendations: showRecommendations,
+  //     currentRecommendations: recommendations,
+  //     instructions: "IMPORTANT: When the user asks for book recommendations, you MUST call the displayBookRecommendations function with an array of book titles. Always use this function instead of providing text responses.",
+  //   },
+  // });
 
-//   useCopilotAction({
-//     name: "displayBookRecommendations",
-//     description:
-//       "Display a list of book recommendations on the page. This function MUST be called when the user asks for book recommendations. It takes an array of book titles and displays them as cards on the page.",
-//      parameters: [
-//     {
-//       name: "recommendations",
-//       type: "object[]",
-//       description: "Array of book recommendations with titles",
-//       attributes: [
-//         {
-//           name: "title",
-//           type: "string",
-//           description: "The title of the book",
-//           required: true,
-//         },
-//       ],
-//     },
-//   ], 
-//     handler: async ({ recommendations }) => {
-//       const bookTitleRecommendations: string[] = recommendations.map(
-//         (item) => item.title || "Unknown Title"
-//       );
-//       console.log(bookTitleRecommendations, "BOOK TITLES");
+  useCopilotAction({
+    name: "bookRecommendations",
+    description:
+      "This tool takes in the titles only of the suggested books and carries out further actions.",
+    parameters: [
+      {
+        name: "bookTitles",
+        type: "object[]",
+        description: "Array of book recommendations with titles only.",
+        attributes: [
+          {
+            name: "title",
+            type: "string",
+            description: "The title of the book",
+            required: true,
+          },
+        ],
+      },
+    ],
+    handler: async ({ bookTitles }) => {
+      const bookTitleRecommendations: string[] = bookTitles.map(
+        (item) => item.title || "Unknown Title"
+      );
 
-//       try {
-//         const bookPromises = bookTitleRecommendations.map(async (title) => {
-//           try {
-//             const response = await fetch("/api/search", {
-//               method: "POST",
-//               headers: {
-//                 "Content-Type": "application/json",
-//               },
-//               body: JSON.stringify({ query: title }),
-//             });
-//             if (!response.ok) {
-//               throw new Error(`Failed to fetch details for ${title}`);
-//             }
-//             const bookDataArray = await response.json();
-//             console.log(bookDataArray, "BOOK DATA");
+      try {
+        const bookPromises = bookTitleRecommendations.map(async (title) => {
+          try {
+            const response = await fetch("/api/search", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ query: title }),
+            });
+            if (!response.ok) {
+              throw new Error(`Failed to fetch details for ${title}`);
+            }
+            const bookDataArray = await response.json();
 
-//             // Take the first book from the array
-//             const bookData = bookDataArray[0];
-//             if (!bookData) {
-//               throw new Error(`No book found for ${title}`);
-//             }
+            // Take the first book from the array
+            const bookData = bookDataArray[0];
+            if (!bookData) {
+              throw new Error(`No book found for ${title}`);
+            }
 
-//             return {
-//               ...bookData,
-//               status: bookData.status === "unread" ? "none" : bookData.status,
-//             };
-//           } catch (error) {
-//             console.error(`Error fetching book details for ${title}:`, error);
-//             // Return a fallback book object if API call fails
-//             return {
-//               id: Math.random().toString(36).substr(2, 9),
-//               title: title,
-//               author: "Unknown Author",
-//               cover: "/placeholder.svg?height=300&width=200",
-//               rating: 0,
-//               genre: "Unknown Genre",
-//               description: "No description available.",
-//               pages: 0,
-//               publisher: "Unknown Publisher",
-//               publishYear: 0,
-//               status: "none" as const,
-//               language: "Unknown",
-//             };
-//           }
-//         });
+            return {
+              ...bookData,
+              status: bookData.status === "unread" ? "none" : bookData.status,
+            };
+          } catch (error) {
+            console.error(`Error fetching book details for ${title}:`, error);
+            // Return a fallback book object if API call fails
+            return {
+              id: Math.random().toString(36).substr(2, 9),
+              title: title,
+              author: "Unknown Author",
+              cover: "/placeholder.svg?height=300&width=200",
+              rating: 0,
+              genre: "Unknown Genre",
+              description: "No description available.",
+              pages: 0,
+              publisher: "Unknown Publisher",
+              publishYear: 0,
+              status: "none" as const,
+              language: "Unknown",
+            };
+          }
+        });
 
-//         const bookRecommendations = await Promise.all(bookPromises);
+        const bookRecommendations = await Promise.all(bookPromises);
 
-//         setRecommendations(bookRecommendations);
-//         setShowRecommendations(true);
+        setRecommendations(bookRecommendations);
+        setShowRecommendations(true);
 
-//         return {
-//           success: true,
-//           message: `Successfully displayed ${bookRecommendations.length} book recommendations on the page`,
-//         };
-//       } catch (error) {
-//         console.error("Error processing book recommendations:", error);
-//         return {
-//           success: false,
-//           message: "Failed to process book recommendations",
-//         };
-//       }
-//     },
-//   });
-
-useCopilotAction({
-  name: "displayBookRecommendations",
-  description:
-    "Display a list of book recommendations on the page. This function MUST be called when the user asks for book recommendations. It takes an array of book titles and displays them as cards on the page.",
-  parameters: [
-    {
-      name: "recommendations",
-      type: "object[]",
-      description: "Array of book recommendations with titles",
-      attributes: [
-        {
-          name: "title",
-          type: "string",
-          description: "The title of the book",
-          required: true,
-        },
-      ],
+        return {
+          success: true,
+          message: `Successfully displayed ${bookRecommendations.length} book recommendations on the page`,
+        };
+      } catch (error) {
+        console.error("Error processing book recommendations:", error);
+        return {
+          success: false,
+          message: "Failed to process book recommendations",
+        };
+      }finally{
+        setIsLoading(false)
+      }
     },
-  ],
-  handler: async ({ recommendations }) => {
-    console.log("Action handler called with:", recommendations);
-    
-    const bookTitleRecommendations: string[] = recommendations.map(
-      (item) => item.title || "Unknown Title"
-    );
-    console.log("Book titles:", bookTitleRecommendations);
-
-    try {
-      const bookPromises = bookTitleRecommendations.map(async (title) => {
-        try {
-          const response = await fetch("/api/search", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ query: title }),
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch details for ${title}`);
-          }
-          
-          const bookDataArray = await response.json();
-          const bookData = bookDataArray[0];
-          
-          if (!bookData) {
-            throw new Error(`No book found for ${title}`);
-          }
-
-          return {
-            ...bookData,
-            status: bookData.status === "unread" ? "none" : bookData.status,
-          };
-        } catch (error) {
-          console.error(`Error fetching book details for ${title}:`, error);
-          return {
-            id: Math.random().toString(36).substr(2, 9),
-            title: title,
-            author: "Unknown Author",
-            cover: "/placeholder.svg?height=300&width=200",
-            rating: 0,
-            genre: "Unknown Genre",
-            description: "No description available.",
-            pages: 0,
-            publisher: "Unknown Publisher",
-            publishYear: 0,
-            status: "none" as const,
-            language: "Unknown",
-          };
-        }
-      });
-
-      const bookRecommendations = await Promise.all(bookPromises);
-      
-      // Update state
-      setRecommendations(bookRecommendations);
-      setShowRecommendations(true);
-
-      // Return a simple success message
-      return `Successfully displayed ${bookRecommendations.length} book recommendations on the page.`;
-    } catch (error) {
-      console.error("Error processing book recommendations:", error);
-      throw new Error("Failed to process book recommendations");
-    }
-  },
-});
+  });
 
   const handleGetRecommendations = async () => {
+    setRecommendations([]);
+    setShowRecommendations(false);
+    setIsLoading(true)
 
-  setRecommendations([]);
-  setShowRecommendations(false);
+    // const message = `I want book recommendations for the genre "${genre}" and interests "${interests}".
+    // Please recommend 4-6 books and CALL THE displayBookRecommendations FUNCTION to show them on the page.
+    // You must use the displayBookRecommendations function - do not just list books in text.
+    // For each book, provide just the title in the recommendations array.`;
 
-  const message = `I want book recommendations for the genre "${genre}" and interests "${interests}". 
-  Please recommend 4-6 books and CALL THE displayBookRecommendations FUNCTION to show them on the page. 
-  You must use the displayBookRecommendations function - do not just list books in text. 
-  For each book, provide just the title in the recommendations array.`;
+    const message = `Based on what you know,can you please suggest me 4-6 books which I can read with the genre :"${genre}" and based on my interests : "${interests}".`;
 
-  console.log("Sending message:", message);
-  
-  appendMessage(
-    new TextMessage({
-      content: message,
-      role: Role.User,
-    })
-  );
-};
 
-useEffect(() => {
-  console.log("Chat messages:", visibleMessages);
-}, [visibleMessages]);
+    appendMessage(
+      new TextMessage({
+        content: message,
+        role: Role.User,
+      })
+    );
+  };
+
+  const handleAddBookToCollection = (book: Omit<Book, "id">)=>{
+    addNewBook(book)
+    console.log('Called')
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -305,12 +214,21 @@ useEffect(() => {
             variants={itemVariants}
             className="text-center mb-6 md:mb-8"
           >
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <BookOpen className="w-8 h-8 text-yellow-300" />
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-                Book Recommendations
+            <div className="flex flex-wrap items-start justify-center mb-4">
+              {/* Icon + Book */}
+              <div className="flex items-center gap-3">
+                <BookOpen className="w-8 h-8 text-yellow-300" />
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+                  Book
+                </h1>
+              </div>
+
+              {/* Recommendations */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white w-full text-center sm:text-left mt-1 sm:mt-0 sm:w-auto sm:ml-2">
+                Recommendations
               </h1>
             </div>
+
             <p className="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto">
               Discover your next favorite read with AI-powered personalized
               recommendations
@@ -394,7 +312,8 @@ useEffect(() => {
                 </h2>
                 <p className="text-blue-100 text-lg">
                   Based on your preferences for {genre.toLowerCase()} and{" "}
-                  {interests.toLowerCase()}
+                  {interests.toLowerCase()}, I would suggest the following
+                  books...
                 </p>
               </div>
 
@@ -421,6 +340,10 @@ useEffect(() => {
 
                           {/* Add to List Button */}
                           <motion.button
+                            onClick = {()=>{
+                              const { id, ...bookWithoutId } = book
+                              handleAddBookToCollection(bookWithoutId)
+                              }}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             className="absolute top-0 right-0 z-10 w-7 h-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
@@ -495,3 +418,5 @@ useEffect(() => {
     </div>
   );
 }
+
+

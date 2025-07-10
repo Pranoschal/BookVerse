@@ -7,7 +7,6 @@ import "@copilotkit/react-ui/styles.css";
 import { BooksProvider } from "./contexts/booksContext";
 import { Toaster } from "sonner";
 
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -26,13 +25,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <BooksProvider>
+    <BooksProvider>
+      <html lang="en">
+        <body className={inter.className}>
           <CopilotKit runtimeUrl="/api/copilotkit">{children}</CopilotKit>
-        </BooksProvider>
-        <Toaster />
-      </body>
-    </html>
+          <Toaster />
+        </body>
+      </html>
+    </BooksProvider>
   );
 }
