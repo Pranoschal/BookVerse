@@ -366,7 +366,7 @@ export default function BookWebsite() {
         }}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
-      Header={ChatHeader}
+      // Header={ChatHeader}
       // Button={() => <ChatButton onClick={handleOpenPopup} />} 
       />
     </div>

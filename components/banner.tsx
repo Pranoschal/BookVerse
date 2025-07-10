@@ -1,8 +1,13 @@
 import { motion } from "framer-motion";
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
 
 const Banner = ()=>{
+  const router = useRouter();
+  const handleGetRecommendations = () => {
+  router.push('/bookRecommendation');
+};
     return (<div className="relative container mx-auto px-4 py-20 lg:py-32">
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -45,11 +50,12 @@ const Banner = ()=>{
                 Start Reading
               </Button>
               <Button
+                onClick= {handleGetRecommendations}
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg bg-transparent"
               >
-                Browse Collection
+                Get Recommended Books
               </Button>
             </motion.div>
           </motion.div>
