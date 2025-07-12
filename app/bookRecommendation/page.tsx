@@ -1,6 +1,5 @@
 "use client";
 
-import { v4 as uuidv4 } from 'uuid';
 import { AddNewBook, Book } from "@/types-interfaces/types";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -18,30 +17,31 @@ import {
 } from "@copilotkit/react-core";
 import { Role, TextMessage } from "@copilotkit/runtime-client-gql";
 import Footer from "@/components/footer";
-
-
-
+import { v4 as uuidv4 } from "uuid";
+import { Message } from "@copilotkit/runtime-client-gql";
 
 export default function BookRecommendationPage() {
-
-  const {addNewBook} = useBooks()
+  const { addNewBook } = useBooks();
   const [genre, setGenre] = useState("Fiction");
   const [interests, setInterests] = useState("Reading");
   const [recommendations, setRecommendations] = useState<Book[]>([]);
-  //   const [isLoading, setIsLoading] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [componentKey, setComponentKey] = useState(0)
 
-  const { appendMessage,stopGeneration,visibleMessages } = useCopilotChat();
-  const [isLoading, setIsLoading] = useState(false)
+  // Modify your useCopilotChat hook to include the key
+  const { appendMessage, stopGeneration, visibleMessages, setMessages } =
+    useCopilotChat();
+  const [isLoading, setIsLoading] = useState(false);
 
-    useCopilotReadable({
+  useCopilotReadable({
     description: "User's current book preferences and page state",
     value: {
       genre,
       interests,
       hasRecommendations: showRecommendations,
       currentRecommendations: recommendations,
-      instructions: "IMPORTANT: When the user asks for book recommendations, you MUST call the displayBookRecommendations function with an array of book titles. Always use this function instead of providing text responses.",
+      instructions:
+        "IMPORTANT: When the user asks for book recommendations, you MUST call the displayBookRecommendations function with an array of book titles. Always use this function instead of providing text responses.",
     },
   });
 
@@ -118,7 +118,6 @@ export default function BookRecommendationPage() {
 
         setRecommendations(bookRecommendations);
         setShowRecommendations(true);
-
         return {
           success: true,
           message: `Successfully displayed ${bookRecommendations.length} book recommendations on the page`,
@@ -129,20 +128,22 @@ export default function BookRecommendationPage() {
           success: false,
           message: "Failed to process book recommendations",
         };
-      }finally{
-        setIsLoading(false)
+      } finally {
+        setIsLoading(false);
       }
     },
   });
 
-  useEffect(()=>{
-    console.log(visibleMessages,'MESSAGES')
-  },[visibleMessages])
+  useEffect(() => {
+    console.log(visibleMessages, "MESSAGES");
+  }, [visibleMessages]);
 
   const handleGetRecommendations = async () => {
     setRecommendations([]);
     setShowRecommendations(false);
-    setIsLoading(true)
+    setIsLoading(true);
+    setComponentKey(prev => prev + 1);
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     // const message = `I want book recommendations for the genre "${genre}" and interests "${interests}".
     // Please recommend 4-6 books and CALL THE displayBookRecommendations FUNCTION to show them on the page.
@@ -150,7 +151,6 @@ export default function BookRecommendationPage() {
     // For each book, provide just the title in the recommendations array.`;
 
     const message = `Based on what you know,can you please suggest me 4-6 books which I can read with the genre :"${genre}" and based on my interests : "${interests}".`;
-
 
     appendMessage(
       new TextMessage({
@@ -160,10 +160,9 @@ export default function BookRecommendationPage() {
     );
   };
 
-  const handleAddBookToCollection = (book: Omit<Book, "id">)=>{
-    addNewBook(book)
-    console.log('Called')
-  }
+  const handleAddBookToCollection = (book: Omit<Book, "id">) => {
+    addNewBook(book);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -344,10 +343,10 @@ export default function BookRecommendationPage() {
 
                           {/* Add to List Button */}
                           <motion.button
-                            onClick = {()=>{
-                              const { id, ...bookWithoutId } = book
-                              handleAddBookToCollection(bookWithoutId)
-                              }}
+                            onClick={() => {
+                              const { id, ...bookWithoutId } = book;
+                              handleAddBookToCollection(bookWithoutId);
+                            }}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             className="absolute top-0 right-0 z-10 w-7 h-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
@@ -422,5 +421,3 @@ export default function BookRecommendationPage() {
     </div>
   );
 }
-
-

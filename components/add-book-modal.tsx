@@ -1,25 +1,41 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, BookOpen, Star, Calendar, FileText, User, Tag, Globe, Building } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Book } from "@/types-interfaces/types"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  BookOpen,
+  Star,
+  Calendar,
+  FileText,
+  User,
+  Tag,
+  Globe,
+  Building,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Book } from "@/types-interfaces/types";
 
 interface BookModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onAddBook: (book: Omit<Book, "id">) => void
-  onEditBook?: (book: Book) => void
-  editingBook?: Book | null
-  mode: "add" | "edit"
-  genres : string[]
+  isOpen: boolean;
+  onClose: () => void;
+  onAddBook: (book: Omit<Book, "id">) => void;
+  onEditBook?: (book: Book) => void;
+  editingBook?: Book | null;
+  mode: "add" | "edit";
+  genres: string[];
 }
 
 const languages = [
@@ -52,7 +68,7 @@ const languages = [
   "Malay",
   "Filipino",
   "Other",
-]
+];
 
 export default function BookModalComponent({
   isOpen,
@@ -61,7 +77,7 @@ export default function BookModalComponent({
   onEditBook,
   editingBook,
   mode,
-  genres
+  genres,
 }: BookModalProps) {
   const [formData, setFormData] = useState<Book>({
     id: "",
@@ -76,19 +92,14 @@ export default function BookModalComponent({
     status: "none",
     language: "English",
     publisher: "",
-  })
+  });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof Book, string>>>({})
-
-  useEffect(()=>{
-    console.log(editingBook)
-  },[editingBook])
-
+  const [errors, setErrors] = useState<Partial<Record<keyof Book, string>>>({});
 
   // Populate form when editing
   useEffect(() => {
     if (mode === "edit" && editingBook) {
-      setFormData(editingBook)
+      setFormData(editingBook);
     } else {
       setFormData({
         id: "",
@@ -103,49 +114,55 @@ export default function BookModalComponent({
         status: "none",
         language: "English",
         publisher: "",
-      })
+      });
     }
-  }, [mode, editingBook, isOpen])
+  }, [mode, editingBook, isOpen, genres]);
 
   const handleInputChange = (field: keyof Book, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
-  }
+  };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof Book, string>> = {}
+    const newErrors: Partial<Record<keyof Book, string>> = {};
 
-    if (!formData.title.trim()) newErrors.title = "Title is required"
-    if (!formData.author.trim()) newErrors.author = "Author is required"
-    if (!formData.genre) newErrors.genre = "Genre is required"
-    if (!formData.language) newErrors.language = "Language is required"
-    if (!formData.publisher.trim()) newErrors.publisher = "Publisher is required"
-    if (!formData.description.trim()) newErrors.description = "Description is required"
-    if (formData.pages <= 0) newErrors.pages = "Pages must be greater than 0"
-    if (formData.publishYear < 1000 || formData.publishYear > new Date().getFullYear() + 10)
-      newErrors.publishYear = "Please enter a valid year"
-    if (formData.rating < 0 || formData.rating > 5) newErrors.rating = "Rating must be between 0 and 5"
+    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.author.trim()) newErrors.author = "Author is required";
+    if (!formData.genre) newErrors.genre = "Genre is required";
+    if (!formData.language) newErrors.language = "Language is required";
+    if (!formData.publisher.trim())
+      newErrors.publisher = "Publisher is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
+    if (formData.pages <= 0) newErrors.pages = "Pages must be greater than 0";
+    if (
+      formData.publishYear < 1000 ||
+      formData.publishYear > new Date().getFullYear() + 10
+    )
+      newErrors.publishYear = "Please enter a valid year";
+    if (formData.rating < 0 || formData.rating > 5)
+      newErrors.rating = "Rating must be between 0 and 5";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (validateForm()) {
       const bookToSubmit = {
         ...formData,
         cover: formData.cover || "/placeholder.svg?height=300&width=200",
-      }
+      };
 
       if (mode === "edit" && onEditBook && formData.id) {
-        onEditBook(bookToSubmit as Book)
+        onEditBook(bookToSubmit as Book);
       } else {
-        const { id, ...bookWithoutId } = bookToSubmit
-        onAddBook(bookWithoutId)
+        const { id, ...bookWithoutId } = bookToSubmit;
+        onAddBook(bookWithoutId);
       }
 
       // Reset form
@@ -162,13 +179,13 @@ export default function BookModalComponent({
         status: "none",
         language: "English",
         publisher: "",
-      })
-      setErrors({})
+      });
+      setErrors({});
     }
-  }
+  };
 
   const handleClose = () => {
-    onClose()
+    onClose();
     // Reset form and errors when closing
     setFormData({
       id: "",
@@ -183,9 +200,9 @@ export default function BookModalComponent({
       status: "none",
       language: "English",
       publisher: "",
-    })
-    setErrors({})
-  }
+    });
+    setErrors({});
+  };
 
   return (
     <AnimatePresence>
@@ -219,7 +236,9 @@ export default function BookModalComponent({
                       {mode === "edit" ? "Edit Book" : "Add to BookVerse"}
                     </h2>
                     <p className="text-blue-100 text-xs sm:text-sm">
-                      {mode === "edit" ? "Update your book details" : "Expand your reading universe"}
+                      {mode === "edit"
+                        ? "Update your book details"
+                        : "Expand your reading universe"}
                     </p>
                   </div>
                 </div>
@@ -236,115 +255,194 @@ export default function BookModalComponent({
 
             {/* Form */}
             <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-[calc(95vh-100px)] sm:max-h-[calc(90vh-120px)]">
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-6">
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-3 sm:space-y-4 md:space-y-6"
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                   {/* Title */}
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="title"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <FileText className="w-4 h-4 text-purple-500" />
                       Book Title *
                     </Label>
                     <Input
                       id="title"
                       value={formData.title}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("title", e.target.value)
+                      }
                       placeholder="Enter book title"
                       className={`bg-white/90 border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 transition-all duration-300 text-sm sm:text-base ${
-                        errors.title ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                        errors.title
+                          ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                          : ""
                       }`}
                     />
-                    {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
+                    {errors.title && (
+                      <p className="text-red-500 text-sm">{errors.title}</p>
+                    )}
                   </div>
 
                   {/* Author */}
                   <div className="space-y-2">
-                    <Label htmlFor="author" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="author"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <User className="w-4 h-4 text-blue-500" />
                       Author *
                     </Label>
                     <Input
                       id="author"
                       value={formData.author}
-                      onChange={(e) => handleInputChange("author", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("author", e.target.value)
+                      }
                       placeholder="Enter author name"
                       className={`bg-white/90 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm sm:text-base ${
-                        errors.author ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                        errors.author
+                          ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                          : ""
                       }`}
                     />
-                    {errors.author && <p className="text-red-500 text-sm">{errors.author}</p>}
+                    {errors.author && (
+                      <p className="text-red-500 text-sm">{errors.author}</p>
+                    )}
                   </div>
 
                   {/* Publisher */}
                   <div className="space-y-2">
-                    <Label htmlFor="publisher" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="publisher"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <Building className="w-4 h-4 text-orange-500" />
                       Publisher *
                     </Label>
                     <Input
                       id="publisher"
                       value={formData.publisher}
-                      onChange={(e) => handleInputChange("publisher", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("publisher", e.target.value)
+                      }
                       placeholder="Enter publisher name"
                       className={`bg-white/90 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 text-sm sm:text-base ${
-                        errors.publisher ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                        errors.publisher
+                          ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                          : ""
                       }`}
                     />
-                    {errors.publisher && <p className="text-red-500 text-sm">{errors.publisher}</p>}
+                    {errors.publisher && (
+                      <p className="text-red-500 text-sm">{errors.publisher}</p>
+                    )}
                   </div>
 
                   {/* Genre */}
                   <div className="space-y-2">
-                    <Label htmlFor="genre" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="genre"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <Tag className="w-4 h-4 text-emerald-500" />
                       Genre *
                     </Label>
-                    <Select value={formData.genre} onValueChange={(value) => handleInputChange("genre", value)}>
+                    <Select
+                      value={formData.genre}
+                      onValueChange={(value) => {
+                        console.log(
+                          "🎯 Genre Select onValueChange triggered with:",
+                          value
+                        );
+                        console.log(
+                          "🎯 Current formData.genre:",
+                          formData.genre
+                        );
+                        console.log("🎯 Available genres:", genres);
+
+                        // Only update if we have a valid value or if user is intentionally clearing
+                        if (value && value !== "") {
+                          handleInputChange("genre", value);
+                        }
+                      }}
+                    >
+                      {" "}
                       <SelectTrigger
                         className={`bg-white/90 border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                          errors.genre ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                          errors.genre
+                            ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                            : ""
                         }`}
                       >
                         <SelectValue placeholder="Select genre" />
                       </SelectTrigger>
                       <SelectContent className="bg-white/95 backdrop-blur-sm">
                         {genres.map((genre) => (
-                          <SelectItem key={genre} value={genre} className="hover:bg-emerald-50">
+                          <SelectItem
+                            key={genre}
+                            value={genre}
+                            className="hover:bg-emerald-50"
+                          >
                             {genre}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors.genre && <p className="text-red-500 text-sm">{errors.genre}</p>}
+                    {errors.genre && (
+                      <p className="text-red-500 text-sm">{errors.genre}</p>
+                    )}
                   </div>
 
                   {/* Language */}
                   <div className="space-y-2">
-                    <Label htmlFor="language" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="language"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <Globe className="w-4 h-4 text-green-500" />
                       Language *
                     </Label>
-                    <Select value={formData.language} onValueChange={(value) => handleInputChange("language", value)}>
+                    <Select
+                      value={formData.language}
+                      onValueChange={(value) =>
+                        handleInputChange("language", value)
+                      }
+                    >
                       <SelectTrigger
                         className={`bg-white/90 border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-200 ${
-                          errors.language ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                          errors.language
+                            ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                            : ""
                         }`}
                       >
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent className="bg-white/95 backdrop-blur-sm max-h-48">
                         {languages.map((language) => (
-                          <SelectItem key={language} value={language} className="hover:bg-green-50">
+                          <SelectItem
+                            key={language}
+                            value={language}
+                            className="hover:bg-green-50"
+                          >
                             {language}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors.language && <p className="text-red-500 text-sm">{errors.language}</p>}
+                    {errors.language && (
+                      <p className="text-red-500 text-sm">{errors.language}</p>
+                    )}
                   </div>
 
                   {/* Rating */}
                   <div className="space-y-2">
-                    <Label htmlFor="rating" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="rating"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <Star className="w-4 h-4 text-yellow-500" />
                       Rating (0-5)
                     </Label>
@@ -355,18 +453,30 @@ export default function BookModalComponent({
                       max="5"
                       step="0.1"
                       value={formData.rating}
-                      onChange={(e) => handleInputChange("rating", Number.parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "rating",
+                          Number.parseFloat(e.target.value) || 0
+                        )
+                      }
                       placeholder="4.5"
                       className={`bg-white/90 border-gray-200 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 transition-all duration-300 text-sm sm:text-base ${
-                        errors.rating ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                        errors.rating
+                          ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                          : ""
                       }`}
                     />
-                    {errors.rating && <p className="text-red-500 text-sm">{errors.rating}</p>}
+                    {errors.rating && (
+                      <p className="text-red-500 text-sm">{errors.rating}</p>
+                    )}
                   </div>
 
                   {/* Pages */}
                   <div className="space-y-2">
-                    <Label htmlFor="pages" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="pages"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <FileText className="w-4 h-4 text-indigo-500" />
                       Pages *
                     </Label>
@@ -375,18 +485,30 @@ export default function BookModalComponent({
                       type="number"
                       min="1"
                       value={formData.pages}
-                      onChange={(e) => handleInputChange("pages", Number.parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "pages",
+                          Number.parseInt(e.target.value) || 0
+                        )
+                      }
                       placeholder="320"
                       className={`bg-white/90 border-gray-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-sm sm:text-base ${
-                        errors.pages ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                        errors.pages
+                          ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                          : ""
                       }`}
                     />
-                    {errors.pages && <p className="text-red-500 text-sm">{errors.pages}</p>}
+                    {errors.pages && (
+                      <p className="text-red-500 text-sm">{errors.pages}</p>
+                    )}
                   </div>
 
                   {/* Publish Year */}
                   <div className="space-y-2">
-                    <Label htmlFor="publishYear" className="flex items-center gap-2 text-gray-700 font-medium">
+                    <Label
+                      htmlFor="publishYear"
+                      className="flex items-center gap-2 text-gray-700 font-medium"
+                    >
                       <Calendar className="w-4 h-4 text-pink-500" />
                       Publish Year *
                     </Label>
@@ -397,20 +519,33 @@ export default function BookModalComponent({
                       max={new Date().getFullYear() + 10}
                       value={formData.publishYear}
                       onChange={(e) =>
-                        handleInputChange("publishYear", Number.parseInt(e.target.value) || new Date().getFullYear())
+                        handleInputChange(
+                          "publishYear",
+                          Number.parseInt(e.target.value) ||
+                            new Date().getFullYear()
+                        )
                       }
                       placeholder="2023"
                       className={`bg-white/90 border-gray-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 transition-all duration-300 text-sm sm:text-base ${
-                        errors.publishYear ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                        errors.publishYear
+                          ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                          : ""
                       }`}
                     />
-                    {errors.publishYear && <p className="text-red-500 text-sm">{errors.publishYear}</p>}
+                    {errors.publishYear && (
+                      <p className="text-red-500 text-sm">
+                        {errors.publishYear}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Cover URL */}
                 <div className="space-y-2">
-                  <Label htmlFor="cover" className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Label
+                    htmlFor="cover"
+                    className="flex items-center gap-2 text-gray-700 font-medium"
+                  >
                     <BookOpen className="w-4 h-4 text-teal-500" />
                     Cover Image URL (Optional)
                   </Label>
@@ -421,35 +556,54 @@ export default function BookModalComponent({
                     placeholder="https://example.com/book-cover.jpg"
                     className="bg-white/90 border-gray-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-200 transition-all duration-300 text-sm sm:text-base"
                   />
-                  <p className="text-gray-500 text-sm">Leave empty to use a placeholder image</p>
+                  <p className="text-gray-500 text-sm">
+                    Leave empty to use a placeholder image
+                  </p>
                 </div>
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Label
+                    htmlFor="description"
+                    className="flex items-center gap-2 text-gray-700 font-medium"
+                  >
                     <FileText className="w-4 h-4 text-orange-500" />
                     Description *
                   </Label>
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("description", e.target.value)
+                    }
                     placeholder="Enter a brief description of the book..."
                     rows={3}
                     className={`bg-white/90 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 resize-none text-sm sm:text-base ${
-                      errors.description ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""
+                      errors.description
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                        : ""
                     }`}
                   />
-                  {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+                  {errors.description && (
+                    <p className="text-red-500 text-sm">{errors.description}</p>
+                  )}
                 </div>
 
                 {/* Status */}
                 <div className="space-y-2">
-                  <Label htmlFor="status" className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Label
+                    htmlFor="status"
+                    className="flex items-center gap-2 text-gray-700 font-medium"
+                  >
                     <BookOpen className="w-4 h-4 text-purple-500" />
                     Reading Status
                   </Label>
-                  <Select value={formData.status} onValueChange={(value: any) => handleInputChange("status", value)}>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value: any) =>
+                      handleInputChange("status", value)
+                    }
+                  >
                     <SelectTrigger className="bg-white/90 border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 text-sm sm:text-base">
                       <SelectValue />
                     </SelectTrigger>
@@ -486,5 +640,5 @@ export default function BookModalComponent({
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }
