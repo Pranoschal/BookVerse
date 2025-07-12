@@ -10,21 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-interface Book {
-  id: string
-  title: string
-  author: string
-  cover: string
-  rating: number
-  genre: string
-  description: string
-  pages: number
-  publishYear: number
-  status: "none" | "wishlist" | "readLater" | "read"
-  language: string
-  publisher: string
-}
+import { Book } from "@/types-interfaces/types"
 
 interface BookModalProps {
   isOpen: boolean
@@ -33,30 +19,8 @@ interface BookModalProps {
   onEditBook?: (book: Book) => void
   editingBook?: Book | null
   mode: "add" | "edit"
+  genres : string[]
 }
-
-const genres = [
-  "Fiction",
-  "Non-Fiction",
-  "Mystery",
-  "Romance",
-  "Sci-Fi",
-  "Fantasy",
-  "Thriller",
-  "Biography",
-  "History",
-  "Self-Help",
-  "Business",
-  "Science",
-  "Philosophy",
-  "Poetry",
-  "Drama",
-  "Horror",
-  "Adventure",
-  "Memoir",
-  "Travel",
-  "Cooking",
-]
 
 const languages = [
   "English",
@@ -97,6 +61,7 @@ export default function BookModalComponent({
   onEditBook,
   editingBook,
   mode,
+  genres
 }: BookModalProps) {
   const [formData, setFormData] = useState<Book>({
     id: "",
@@ -114,6 +79,11 @@ export default function BookModalComponent({
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof Book, string>>>({})
+
+  useEffect(()=>{
+    console.log(editingBook)
+  },[editingBook])
+
 
   // Populate form when editing
   useEffect(() => {

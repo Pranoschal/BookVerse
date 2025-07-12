@@ -1,5 +1,5 @@
 import type React from "react";
-import type { Metadata } from "next";
+import type { Metadata,Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CopilotKit } from "@copilotkit/react-core";
@@ -8,6 +8,13 @@ import { BooksProvider } from "./contexts/booksContext";
 import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const viewport : Viewport = {
+  width : 'device-width',
+  initialScale : 1,
+  maximumScale : 2,
+  userScalable : true
+}
 
 export const metadata: Metadata = {
   title: "BookVerse - Your Reading Universe",

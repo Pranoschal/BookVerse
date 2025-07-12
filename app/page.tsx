@@ -67,6 +67,8 @@ export default function BookWebsite() {
     return ["all", ...Array.from(new Set(allGenres))];
   }, [books]);
 
+  const filteredGenres = genres.filter(genre => genre.toLowerCase() !== "all");
+
   const filteredBooks: Book[] = useMemo(() => {
     let filtered = books;
 
@@ -359,6 +361,7 @@ export default function BookWebsite() {
         onEditBook={editBook}
         editingBook={editingBook}
         mode={modalMode}
+        genres={filteredGenres}
       />
 
       {/* Book Details Modal */}
