@@ -31,19 +31,19 @@ export default function BookRecommendationPage() {
   //   const [isLoading, setIsLoading] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
 
-  const { appendMessage,stopGeneration } = useCopilotChat();
+  const { appendMessage,stopGeneration,visibleMessages } = useCopilotChat();
   const [isLoading, setIsLoading] = useState(false)
 
-  //   useCopilotReadable({
-  //   description: "User's current book preferences and page state",
-  //   value: {
-  //     genre,
-  //     interests,
-  //     hasRecommendations: showRecommendations,
-  //     currentRecommendations: recommendations,
-  //     instructions: "IMPORTANT: When the user asks for book recommendations, you MUST call the displayBookRecommendations function with an array of book titles. Always use this function instead of providing text responses.",
-  //   },
-  // });
+    useCopilotReadable({
+    description: "User's current book preferences and page state",
+    value: {
+      genre,
+      interests,
+      hasRecommendations: showRecommendations,
+      currentRecommendations: recommendations,
+      instructions: "IMPORTANT: When the user asks for book recommendations, you MUST call the displayBookRecommendations function with an array of book titles. Always use this function instead of providing text responses.",
+    },
+  });
 
   useCopilotAction({
     name: "bookRecommendations",
@@ -134,6 +134,10 @@ export default function BookRecommendationPage() {
       }
     },
   });
+
+  useEffect(()=>{
+    console.log(visibleMessages,'MESSAGES')
+  },[visibleMessages])
 
   const handleGetRecommendations = async () => {
     setRecommendations([]);

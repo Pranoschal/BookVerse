@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Copy, RefreshCw, Sparkles, ThumbsUp, ThumbsDown, Check } from "lucide-react"
 import { useState, useEffect } from "react"
 import { AssistantMessageProps } from "@copilotkit/react-ui"
+import { Markdown } from "@copilotkit/react-ui"
 
 // Import the actual TextMessage type and MessageRole enum from CopilotKit
 import { TextMessage, MessageRole } from "@copilotkit/runtime-client-gql"
@@ -167,7 +168,7 @@ export function AssistantMessage({
                       transition={{ duration: 0.5 }}
                       className="text-slate-700 text-sm sm:text-base leading-relaxed"
                     >
-                      {message}
+                      <Markdown content={message} />
                     </motion.p>
                   )}
                   {subComponent && <div className="mt-2">{subComponent}</div>}

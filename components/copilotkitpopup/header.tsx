@@ -3,14 +3,44 @@
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { X, Sparkles } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { HeaderProps } from "@copilotkit/react-ui"
 
 export function ChatHeader({}: HeaderProps) {
   const [isCloseHovered, setIsCloseHovered] = useState(false)
+  const [isPopupOpen, setIsPopupOpen] = useState(true) // Track popup state
+  
+  // Monitor the popup state by checking DOM classes
+  useEffect(() => {
+    const checkPopupState = () => {
+      const copilotWindow = document.querySelector('.copilotKitWindow.open')
+      setIsPopupOpen(!!copilotWindow)
+    }
+    checkPopupState()
+    
+    // Set up a mutation observer to watch for class changes
+    const observer = new MutationObserver(checkPopupState)
+    const copilotWindow = document.querySelector('.copilotKitWindow')
+    
+    if (copilotWindow) {
+      observer.observe(copilotWindow, { 
+        attributes: true, 
+        attributeFilter: ['class'] 
+      })
+    }
+    
+    return () => observer.disconnect()
+  }, [])
 
   const handleClose = () => {
-    console.log("Close chat")
+      const copilotWindow = document.querySelector('.copilotKitWindow.open') as HTMLElement
+      const copilotButton = document.querySelector('.copilotKitButton.open') as HTMLElement
+      if (copilotWindow && copilotButton) {
+        copilotButton.click()
+        copilotWindow.classList.remove('open')
+        copilotButton.classList.remove('open')
+        setIsPopupOpen(false)
+      }
   }
 
   return (
@@ -146,6 +176,7 @@ export function ChatHeader({}: HeaderProps) {
             onClick={handleClose}
             onMouseEnter={() => setIsCloseHovered(true)}
             onMouseLeave={() => setIsCloseHovered(false)}
+            aria-label={isPopupOpen ? "Close Chat" : "Open Chat"}
             className="h-8 w-8 sm:h-10 sm:w-10 p-0 text-white/80 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 rounded-full border border-white/20 hover:border-white/40"
           >
             <motion.div
