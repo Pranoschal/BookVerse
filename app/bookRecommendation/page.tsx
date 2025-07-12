@@ -26,7 +26,7 @@ export default function BookRecommendationPage() {
   const [interests, setInterests] = useState("Reading");
   const [recommendations, setRecommendations] = useState<Book[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const [componentKey, setComponentKey] = useState(0)
+  const [componentKey, setComponentKey] = useState(0);
 
   // Modify your useCopilotChat hook to include the key
   const { appendMessage, stopGeneration, visibleMessages, setMessages } =
@@ -83,12 +83,18 @@ export default function BookRecommendationPage() {
               throw new Error(`Failed to fetch details for ${title}`);
             }
             const bookDataArray = await response.json();
+            let bookData = bookDataArray.find(
+              (book:Book) => book.cover && !book.cover.includes("/placeholder.svg")
+            );
 
-            // Take the first book from the array
-            const bookData = bookDataArray[0];
+            // If no book without placeholder is found, fall back to the first book
+            if (!bookData) {
+              bookData = bookDataArray[0];
+            }
             if (!bookData) {
               throw new Error(`No book found for ${title}`);
             }
+            console.log(bookData, "Book Data");
 
             return {
               ...bookData,
@@ -142,8 +148,8 @@ export default function BookRecommendationPage() {
     setRecommendations([]);
     setShowRecommendations(false);
     setIsLoading(true);
-    setComponentKey(prev => prev + 1);
-    await new Promise(resolve => setTimeout(resolve, 300));
+    setComponentKey((prev) => prev + 1);
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     // const message = `I want book recommendations for the genre "${genre}" and interests "${interests}".
     // Please recommend 4-6 books and CALL THE displayBookRecommendations FUNCTION to show them on the page.
@@ -331,7 +337,7 @@ export default function BookRecommendationPage() {
                     transition={{ delay: index * 0.1 }}
                     className="h-full"
                   >
-                    <Card className="group relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-0 bg-white/95 backdrop-blur-sm h-full flex flex-col">
+                    <Card className="group relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/50 to-blue-500/50 backdrop-blur-sm h-full flex flex-col">
                       <CardContent className="p-4 flex flex-col h-full">
                         <div className="relative flex-1">
                           {/* Genre Badge */}

@@ -353,17 +353,6 @@ export default function BookModalComponent({
                     <Select
                       value={formData.genre}
                       onValueChange={(value) => {
-                        console.log(
-                          "🎯 Genre Select onValueChange triggered with:",
-                          value
-                        );
-                        console.log(
-                          "🎯 Current formData.genre:",
-                          formData.genre
-                        );
-                        console.log("🎯 Available genres:", genres);
-
-                        // Only update if we have a valid value or if user is intentionally clearing
                         if (value && value !== "") {
                           handleInputChange("genre", value);
                         }
