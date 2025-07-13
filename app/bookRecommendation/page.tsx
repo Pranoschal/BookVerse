@@ -1,6 +1,6 @@
 "use client";
 
-import { AddNewBook, Book } from "@/types-interfaces/types";
+import { AddNewBook, Book, VoidFunc } from "@/types-interfaces/types";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,7 @@ import {
 } from "@copilotkit/react-core";
 import { Role, TextMessage } from "@copilotkit/runtime-client-gql";
 import Footer from "@/components/footer";
-import { v4 as uuidv4 } from "uuid";
-import { Message } from "@copilotkit/runtime-client-gql";
+import RecommendedBookDetailsModal from "@/components/recomm-book-details";
 
 export default function BookRecommendationPage() {
   const { addNewBook } = useBooks();
@@ -26,12 +25,23 @@ export default function BookRecommendationPage() {
   const [interests, setInterests] = useState("Reading");
   const [recommendations, setRecommendations] = useState<Book[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const [componentKey, setComponentKey] = useState(0);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
 
   // Modify your useCopilotChat hook to include the key
-  const { appendMessage, stopGeneration, visibleMessages, setMessages } =
+  const { appendMessage, stopGeneration, visibleMessages, setMessages, reset } =
     useCopilotChat();
   const [isLoading, setIsLoading] = useState(false);
+
+  const clearChat = async () => {
+    await reset();
+  };
+
+  const closeDetailsModal: VoidFunc = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedBook(null);
+  };
 
   useCopilotReadable({
     description: "User's current book preferences and page state",
@@ -84,7 +94,8 @@ export default function BookRecommendationPage() {
             }
             const bookDataArray = await response.json();
             let bookData = bookDataArray.find(
-              (book:Book) => book.cover && !book.cover.includes("/placeholder.svg")
+              (book: Book) =>
+                book.cover && !book.cover.includes("/placeholder.svg")
             );
 
             // If no book without placeholder is found, fall back to the first book
@@ -148,8 +159,8 @@ export default function BookRecommendationPage() {
     setRecommendations([]);
     setShowRecommendations(false);
     setIsLoading(true);
-    setComponentKey((prev) => prev + 1);
-    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    await clearChat();
 
     // const message = `I want book recommendations for the genre "${genre}" and interests "${interests}".
     // Please recommend 4-6 books and CALL THE displayBookRecommendations FUNCTION to show them on the page.
@@ -337,7 +348,7 @@ export default function BookRecommendationPage() {
                     transition={{ delay: index * 0.1 }}
                     className="h-full"
                   >
-                    <Card className="group relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/50 to-blue-500/50 backdrop-blur-sm h-full flex flex-col">
+                    <Card onClick={()=>{setIsDetailsModalOpen(true), setSelectedBook(book)}} className="group relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/50 to-blue-500/50 backdrop-blur-sm h-full flex flex-col">
                       <CardContent className="p-4 flex flex-col h-full">
                         <div className="relative flex-1">
                           {/* Genre Badge */}
@@ -420,6 +431,11 @@ export default function BookRecommendationPage() {
                   </motion.div>
                 ))}
               </div>
+              <RecommendedBookDetailsModal
+                isOpen={isDetailsModalOpen}
+                onClose={closeDetailsModal}
+                book={selectedBook}
+              />
             </motion.div>
           )}
         </motion.div>

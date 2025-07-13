@@ -1,5 +1,5 @@
 import { Book } from "@/types-interfaces/types";
-
+import {convertLanguageCode} from "./languageMap";
 
 const API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
@@ -30,7 +30,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
         ? parseInt(info.publishedDate.substring(0, 4))
         : 0,
       status: 'none', 
-      language: info.language || 'Unknown',
+      language: convertLanguageCode(info.language) || 'Unknown',
     };
   });
 }

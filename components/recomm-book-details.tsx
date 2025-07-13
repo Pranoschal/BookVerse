@@ -9,18 +9,12 @@ interface BookDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   book: Book | null
-  onUpdateStatus: (bookId: string, newStatus: Book["status"]) => void
-  onEdit: (book: Book) => void
-  onDelete: (bookId: string) => void
 }
 
-export default function BookDetailsModal({
+export default function RecommendedBookDetailsModal({
   isOpen,
   onClose,
-  book,
-  onUpdateStatus,
-  onEdit,
-  onDelete,
+  book
 }: BookDetailsModalProps) {
   if (!book) return null
 
@@ -205,82 +199,6 @@ export default function BookDetailsModal({
                   <h3 className="text-lg font-semibold text-gray-800">Description</h3>
                 </div>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{book.description}</p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800">Quick Actions</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  <Button
-                    size="sm"
-                    variant={book.status === "wishlist" ? "default" : "outline"}
-                    onClick={() => onUpdateStatus(book.id, book.status === "wishlist" ? "none" : "wishlist")}
-                    className={`transition-all duration-300 ${
-                      book.status === "wishlist"
-                        ? "bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0"
-                        : "border-pink-300 text-pink-600 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 hover:text-white hover:border-transparent"
-                    }`}
-                  >
-                    <Heart className={`w-4 h-4 mr-1 ${book.status === "wishlist" ? "fill-current" : ""}`} />
-                    <span className="hidden sm:inline">Wishlist</span>
-                    <span className="sm:hidden">Wish</span>
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    variant={book.status === "readLater" ? "default" : "outline"}
-                    onClick={() => onUpdateStatus(book.id, book.status === "readLater" ? "none" : "readLater")}
-                    className={`transition-all duration-300 ${
-                      book.status === "readLater"
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0"
-                        : "border-emerald-300 text-emerald-600 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500 hover:text-white hover:border-transparent"
-                    }`}
-                  >
-                    <BookOpen className="w-4 h-4 mr-1" />
-                    <span className="hidden sm:inline">Read Later</span>
-                    <span className="sm:hidden">Later</span>
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    variant={book.status === "read" ? "default" : "outline"}
-                    onClick={() => onUpdateStatus(book.id, book.status === "read" ? "none" : "read")}
-                    className={`transition-all duration-300 ${
-                      book.status === "read"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0"
-                        : "border-green-300 text-green-600 hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-500 hover:text-white hover:border-transparent"
-                    }`}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    <span className="hidden sm:inline">{book.status === "read" ? "Completed" : "Mark Read"}</span>
-                    <span className="sm:hidden">{book.status === "read" ? "Done" : "Read"}</span>
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onEdit(book)}
-                    className="border-blue-300 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-transparent transition-all duration-300"
-                  >
-                    <User className="w-4 h-4 mr-1" />
-                    <span className="hidden sm:inline">Edit</span>
-                    <span className="sm:hidden">Edit</span>
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      onDelete(book.id)
-                      onClose()
-                    }}
-                    className="border-red-300 text-red-600 hover:bg-red-500 hover:text-white hover:border-transparent transition-all duration-300 col-span-2 sm:col-span-1"
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    <span className="hidden sm:inline">Delete</span>
-                    <span className="sm:hidden">Delete</span>
-                  </Button>
-                </div>
               </div>
             </div>
           </motion.div>

@@ -171,7 +171,7 @@ export function useBookCopilotActions<
       author,
       publisher,
       genre,
-      language = "English",
+      language,
       rating = 0,
       pages,
       publishYear,
@@ -180,7 +180,6 @@ export function useBookCopilotActions<
       status = "none",
     }) => {
 
-      console.log(status,'STATUS IN THE BEGINNING')
       // First, search for the book using the search API
     let searchResults;
     try {

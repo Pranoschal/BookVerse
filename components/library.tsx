@@ -44,7 +44,7 @@ const Library = ({
       transition={{ delay: 0.4, duration: 0.6 }}
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-gradient-to-r from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-900/50 dark:via-blue-900/50 dark:to-indigo-900/50 backdrop-blur-sm border border-white/20 shadow-lg">
+        {/* <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-gradient-to-r from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-900/50 dark:via-blue-900/50 dark:to-indigo-900/50 backdrop-blur-sm border border-white/20 shadow-lg">
           <TabsTrigger
             value="all"
             className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
@@ -97,6 +97,65 @@ const Library = ({
             <Badge
               variant="secondary"
               className="ml-1 bg-white/80 text-gray-700"
+            >
+              {statusCounts.read}
+            </Badge>
+          </TabsTrigger>
+        </TabsList> */}
+
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-gradient-to-r from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-900/50 dark:via-blue-900/50 dark:to-indigo-900/50 backdrop-blur-sm border border-white/20 shadow-lg">
+          <TabsTrigger
+            value="all"
+            className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 px-1 sm:px-2 overflow-hidden"
+          >
+            <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden md:inline">All Books</span>
+            <span className="md:hidden">All</span>
+            <Badge
+              variant="secondary"
+              className="ml-0.5 sm:ml-1 bg-white/80 text-gray-700 text-xs px-1 py-0 flex-shrink-0"
+            >
+              {statusCounts.all}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger
+            value="wishlist"
+            className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 px-1 sm:px-2 overflow-hidden"
+          >
+            <Heart className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Wishlist</span>
+            <span className="md:hidden">Wish</span>
+            <Badge
+              variant="secondary"
+              className="ml-0.5 sm:ml-1 bg-white/80 text-gray-700 text-xs px-1 py-0 flex-shrink-0"
+            >
+              {statusCounts.wishlist}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger
+            value="readLater"
+            className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 px-1 sm:px-2 overflow-hidden"
+          >
+            <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Read Later</span>
+            <span className="md:hidden">Later</span>
+            <Badge
+              variant="secondary"
+              className="ml-0.5 sm:ml-1 bg-white/80 text-gray-700 text-xs px-1 py-0 flex-shrink-0"
+            >
+              {statusCounts.readLater}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger
+            value="read"
+            className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 px-1 sm:px-2 overflow-hidden"
+          >
+            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Completed</span>
+            <span className="md:hidden">Done</span>
+            <Badge
+              variant="secondary"
+              className="ml-0.5 sm:ml-1 bg-white/80 text-gray-700 text-xs px-1 py-0 flex-shrink-0"
             >
               {statusCounts.read}
             </Badge>

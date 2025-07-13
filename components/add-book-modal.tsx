@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Book } from "@/types-interfaces/types";
+import { languageMap,getAllLanguageNames } from "@/lib/languageMap";
 
 interface BookModalProps {
   isOpen: boolean;
@@ -37,39 +38,6 @@ interface BookModalProps {
   mode: "add" | "edit";
   genres: string[];
 }
-
-const languages = [
-  "English",
-  "Spanish",
-  "French",
-  "German",
-  "Italian",
-  "Portuguese",
-  "Russian",
-  "Chinese",
-  "Japanese",
-  "Korean",
-  "Arabic",
-  "Hindi",
-  "Dutch",
-  "Swedish",
-  "Norwegian",
-  "Danish",
-  "Finnish",
-  "Polish",
-  "Czech",
-  "Hungarian",
-  "Greek",
-  "Turkish",
-  "Hebrew",
-  "Thai",
-  "Vietnamese",
-  "Indonesian",
-  "Malay",
-  "Filipino",
-  "Other",
-];
-
 export default function BookModalComponent({
   isOpen,
   onClose,
@@ -79,6 +47,7 @@ export default function BookModalComponent({
   mode,
   genres,
 }: BookModalProps) {
+  const languages = getAllLanguageNames(languageMap)
   const [formData, setFormData] = useState<Book>({
     id: "",
     title: "",
@@ -90,7 +59,7 @@ export default function BookModalComponent({
     pages: 0,
     publishYear: new Date().getFullYear(),
     status: "none",
-    language: "English",
+    language: "",
     publisher: "",
   });
 
@@ -112,7 +81,7 @@ export default function BookModalComponent({
         pages: 0,
         publishYear: new Date().getFullYear(),
         status: "none",
-        language: "English",
+        language: "",
         publisher: "",
       });
     }
@@ -177,7 +146,7 @@ export default function BookModalComponent({
         pages: 0,
         publishYear: new Date().getFullYear(),
         status: "none",
-        language: "English",
+        language: "",
         publisher: "",
       });
       setErrors({});
@@ -198,7 +167,7 @@ export default function BookModalComponent({
       pages: 0,
       publishYear: new Date().getFullYear(),
       status: "none",
-      language: "English",
+      language: "",
       publisher: "",
     });
     setErrors({});
@@ -397,7 +366,11 @@ export default function BookModalComponent({
                     <Select
                       value={formData.language}
                       onValueChange={(value) =>
-                        handleInputChange("language", value)
+                      {
+                        if (value && value !== ""){
+                             handleInputChange("language", value);
+                        }
+                      }
                       }
                     >
                       <SelectTrigger

@@ -50,17 +50,7 @@ export default function BookWebsite() {
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [saveLibraryLoading, setSaveLibraryLoading] = useState<boolean>(false);
-
-  const handleOpenPopup = () => {
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = (open: boolean) => {
-    setIsPopupOpen(open);
-  };
-
 
   const genres: string[] = useMemo(() => {
     const allGenres = books.map((book) => book.genre);
@@ -105,6 +95,17 @@ export default function BookWebsite() {
     return filtered;
   }, [books, searchQuery, selectedGenre, activeTab]);
   
+  const getStatusCounts = (): StatusCounts => {
+    return {
+      all: books.length,
+      wishlist: books.filter((b) => b.status === "wishlist").length,
+      readLater: books.filter((b) => b.status === "readLater").length,
+      read: books.filter((b) => b.status === "read").length,
+    };
+  };
+
+  const statusCounts: StatusCounts = getStatusCounts();
+
   const updateBookStatus: UpdateBookStatus = (
     bookId: string,
     newStatus: Book["status"]
@@ -155,17 +156,6 @@ export default function BookWebsite() {
     setIsDetailsModalOpen(false);
     setSelectedBook(null);
   };
-
-  const getStatusCounts = (): StatusCounts => {
-    return {
-      all: books.length,
-      wishlist: books.filter((b) => b.status === "wishlist").length,
-      readLater: books.filter((b) => b.status === "readLater").length,
-      read: books.filter((b) => b.status === "read").length,
-    };
-  };
-
-  const statusCounts: StatusCounts = getStatusCounts();
 
   const handleSaveLibrary = async () => {
     try {
@@ -387,7 +377,7 @@ export default function BookWebsite() {
         UserMessage={UserMessage}
         AssistantMessage={AssistantMessage}
         Header={ChatHeader}
-        // Button={() => <ChatButton onClick={handleOpenPopup} />}
+        // Button={() => <ChatButton />}
       />
     </div>
   );
