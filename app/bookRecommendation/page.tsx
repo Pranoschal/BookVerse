@@ -298,8 +298,57 @@ export default function BookRecommendationPage() {
                     <Button
                       onClick={handleGetRecommendations}
                       disabled={isLoading}
-                      className="w-full py-4 text-base md:text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg border-0"
-                    >
+className="
+    relative 
+    overflow-hidden 
+    w-full 
+    py-4 
+    text-base 
+    md:text-lg 
+    font-semibold 
+    bg-gradient-to-r 
+    from-purple-600 
+    to-blue-600 
+    hover:from-purple-700 
+    hover:to-blue-700 
+    text-white 
+    shadow-lg 
+    border-0
+    transition-all 
+    duration-300 
+    ease-in-out
+    hover:shadow-xl
+    hover:shadow-purple-500/30
+    active:scale-[0.98]
+    group
+    disabled:opacity-70
+    disabled:cursor-not-allowed
+    disabled:hover:shadow-lg
+    before:absolute
+    before:inset-0
+    before:bg-gradient-to-r
+    before:from-transparent
+    before:via-white/25
+    before:to-transparent
+    before:translate-x-[-100%]
+    before:skew-x-12
+    before:transition-transform
+    before:duration-1000
+    before:ease-out
+    hover:before:translate-x-[100%]
+    disabled:before:hidden
+    after:absolute
+    after:inset-0
+    after:bg-gradient-to-r
+    after:from-purple-400/0
+    after:via-blue-300/10
+    after:to-purple-400/0
+    after:opacity-0
+    after:transition-opacity
+    after:duration-300
+    hover:after:opacity-100
+    disabled:after:hidden
+  "                    >
                       {isLoading ? (
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
