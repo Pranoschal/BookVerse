@@ -28,7 +28,6 @@ export default function BookRecommendationPage() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-
   // Modify your useCopilotChat hook to include the key
   const { appendMessage, stopGeneration, visibleMessages, setMessages, reset } =
     useCopilotChat();
@@ -257,7 +256,9 @@ export default function BookRecommendationPage() {
 
           {/* Form Section */}
           <motion.div variants={itemVariants} className="mb-8 md:mb-10">
-<Card className="shadow-2xl border-0 bg-gradient-to-r from-purple-400/70 via-pink-400/65 to-indigo-500/70 bg-[length:200%_200%] animate-gradient">  <CardContent className="p-4 md:p-6">
+            <Card className="shadow-2xl border-0 bg-gradient-to-r from-purple-400/70 via-pink-400/65 to-indigo-500/70 bg-[length:200%_200%] animate-gradient">
+              {" "}
+              <CardContent className="p-4 md:p-6">
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <Label
@@ -271,7 +272,7 @@ export default function BookRecommendationPage() {
                       value={genre}
                       onChange={(e) => setGenre(e.target.value)}
                       placeholder="e.g., Fiction, Mystery, Science Fiction..."
-                      className="text-base md:text-lg py-3 px-4 bg-purple-200/40 border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                      className="text-base md:text-lg py-3 px-4 bg-purple-200/40 border-purple-200 focus:border-purple-400 focus:ring-purple-400 [&:focus]:outline-none [&:focus]:ring-0"
                     />
                   </div>
 
@@ -287,7 +288,7 @@ export default function BookRecommendationPage() {
                       value={interests}
                       onChange={(e) => setInterests(e.target.value)}
                       placeholder="e.g., Reading, History, Technology..."
-                      className="text-base md:text-lg py-3 px-4 bg-purple-200/40 border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                      className="text-base md:text-lg py-3 px-4 bg-purple-200/40 border-purple-200 focus:border-purple-400 focus:ring-purple-400 [&:focus]:outline-none [&:focus]:ring-0"
                     />
                   </div>
 
@@ -298,57 +299,58 @@ export default function BookRecommendationPage() {
                     <Button
                       onClick={handleGetRecommendations}
                       disabled={isLoading}
-className="
-    relative 
-    overflow-hidden 
-    w-full 
-    py-4 
-    text-base 
-    md:text-lg 
-    font-semibold 
-    bg-gradient-to-r 
-    from-purple-600 
-    to-blue-600 
-    hover:from-purple-700 
-    hover:to-blue-700 
-    text-white 
-    shadow-lg 
-    border-0
-    transition-all 
-    duration-300 
-    ease-in-out
-    hover:shadow-xl
-    hover:shadow-purple-500/30
-    active:scale-[0.98]
-    group
-    disabled:opacity-70
-    disabled:cursor-not-allowed
-    disabled:hover:shadow-lg
-    before:absolute
-    before:inset-0
-    before:bg-gradient-to-r
-    before:from-transparent
-    before:via-white/25
-    before:to-transparent
-    before:translate-x-[-100%]
-    before:skew-x-12
-    before:transition-transform
-    before:duration-1000
-    before:ease-out
-    hover:before:translate-x-[100%]
-    disabled:before:hidden
-    after:absolute
-    after:inset-0
-    after:bg-gradient-to-r
-    after:from-purple-400/0
-    after:via-blue-300/10
-    after:to-purple-400/0
-    after:opacity-0
-    after:transition-opacity
-    after:duration-300
-    hover:after:opacity-100
-    disabled:after:hidden
-  "                    >
+                      className="
+                      relative 
+                      overflow-hidden 
+                      w-full 
+                      py-4 
+                      text-base 
+                      md:text-lg 
+                      font-semibold 
+                      bg-gradient-to-r 
+                      from-purple-600 
+                      to-blue-600 
+                      hover:from-purple-700 
+                      hover:to-blue-700 
+                      text-white 
+                        shadow-lg 
+                        border-0
+                        transition-all 
+                        duration-300 
+                        ease-in-out
+                        hover:shadow-xl
+                        hover:shadow-purple-500/30
+                        active:scale-[0.98]
+                        group
+                        disabled:opacity-70
+                        disabled:cursor-not-allowed
+                        disabled:hover:shadow-lg
+                        before:absolute
+                        before:inset-0
+                        before:bg-gradient-to-r
+                        before:from-transparent
+                        before:via-white/25
+                        before:to-transparent
+                        before:translate-x-[-100%]
+                        before:skew-x-12
+                        before:transition-transform
+                        before:duration-1000
+                        before:ease-out
+                        hover:before:translate-x-[100%]
+                        disabled:before:hidden
+                        after:absolute
+                        after:inset-0
+                        after:bg-gradient-to-r
+                        after:from-purple-400/0
+                        after:via-blue-300/10
+                        after:to-purple-400/0
+                        after:opacity-0
+                        after:transition-opacity
+                        after:duration-300
+                        hover:after:opacity-100
+                        disabled:after:hidden
+  "
+                    >
                       {isLoading ? (
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -396,7 +398,12 @@ className="
                     transition={{ delay: index * 0.1 }}
                     className="h-full"
                   >
-                    <Card onClick={()=>{setIsDetailsModalOpen(true), setSelectedBook(book)}} className="group relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/50 to-blue-500/50 backdrop-blur-sm h-full flex flex-col">
+                    <Card
+                      onClick={() => {
+                        setIsDetailsModalOpen(true), setSelectedBook(book);
+                      }}
+                      className="group relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/50 to-blue-500/50 backdrop-blur-sm h-full flex flex-col"
+                    >
                       <CardContent className="p-4 flex flex-col h-full">
                         <div className="relative flex-1">
                           {/* Genre Badge */}
