@@ -257,8 +257,7 @@ export default function BookRecommendationPage() {
 
           {/* Form Section */}
           <motion.div variants={itemVariants} className="mb-8 md:mb-10">
-            <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-4 md:p-6">
+<Card className="shadow-2xl border-0 bg-gradient-to-r from-purple-400/70 via-pink-400/65 to-indigo-500/70 bg-[length:200%_200%] animate-gradient">  <CardContent className="p-4 md:p-6">
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <Label
@@ -272,7 +271,7 @@ export default function BookRecommendationPage() {
                       value={genre}
                       onChange={(e) => setGenre(e.target.value)}
                       placeholder="e.g., Fiction, Mystery, Science Fiction..."
-                      className="text-base md:text-lg py-3 px-4 border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                      className="text-base md:text-lg py-3 px-4 bg-purple-200/40 border-purple-200 focus:border-purple-400 focus:ring-purple-400"
                     />
                   </div>
 
@@ -288,7 +287,7 @@ export default function BookRecommendationPage() {
                       value={interests}
                       onChange={(e) => setInterests(e.target.value)}
                       placeholder="e.g., Reading, History, Technology..."
-                      className="text-base md:text-lg py-3 px-4 border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                      className="text-base md:text-lg py-3 px-4 bg-purple-200/40 border-purple-200 focus:border-purple-400 focus:ring-purple-400"
                     />
                   </div>
 

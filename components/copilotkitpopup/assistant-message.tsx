@@ -162,14 +162,14 @@ export function AssistantMessage({
               ) : (
                 <>
                   {message && (
-                    <motion.p
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5 }}
-                      className="text-slate-700 text-sm sm:text-base leading-relaxed"
+                      className="text-slate-700 text-sm sm:text-base leading-relaxed prose prose-sm max-w-none"
                     >
                       <Markdown content={message} />
-                    </motion.p>
+                    </motion.div>
                   )}
                   {subComponent && <div className="mt-2">{subComponent}</div>}
                 </>

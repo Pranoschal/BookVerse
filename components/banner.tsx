@@ -41,25 +41,70 @@ const Banner = () => {
           transition={{ delay: 0.8, duration: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Button
-            size="lg"
-            className="bg-white text-purple-600 hover:bg-blue-50 px-8 py-3 text-lg font-semibold"
+          <Link
+            href="/bookRecommendation"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            Start Reading
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg bg-transparent"
-          >
-            <Link
-              href="/bookRecommendation"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Button
+              variant="outline"
+              size="lg"
+              className="
+        relative 
+        overflow-hidden 
+        bg-gradient-to-r 
+        from-blue-600/30 
+        via-indigo-600/30 
+        to-purple-600/30
+        border-2 
+        border-blue-300/50 
+        backdrop-blur-md
+        px-8 
+        py-4 
+        rounded-xl 
+        font-semibold 
+        text-lg
+        text-purple-600
+        transition-all 
+        duration-300 
+        ease-in-out
+        hover:border-blue-200/70
+        hover:bg-gradient-to-r
+        hover:from-blue-500/40
+        hover:via-indigo-500/40
+        hover:to-purple-500/40
+        hover:scale-105
+        hover:shadow-xl
+        hover:shadow-blue-400/40
+        active:scale-95
+        group
+        before:absolute
+        before:inset-0
+        before:bg-gradient-to-r
+        before:from-transparent
+        before:via-white/40
+        before:to-transparent
+        before:translate-x-[-100%]
+        before:skew-x-12
+        before:transition-transform
+        before:duration-1000
+        before:ease-out
+        hover:before:translate-x-[100%]
+        after:absolute
+        after:inset-0
+        after:bg-gradient-to-r
+        after:from-cyan-300/0
+        after:via-blue-200/20
+        after:to-cyan-300/0
+        after:opacity-0
+        after:transition-opacity
+        after:duration-300
+        hover:after:opacity-100
+      "
             >
               Get Recommended Books
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </motion.div>
       </motion.div>
     </div>
