@@ -82,119 +82,158 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const broadcastToOtherTabs = useCallback((eventType: string, data: any) => {
-        if (typeof window !== 'undefined') {
-            const event = {
-                type: eventType,
-                data: data,
-                timestamp: Date.now(),
-                tabId: sessionStorage.getItem('tabId') || 'unknown'
-            };
-            
-            // Use a temporary localStorage key for event broadcasting
-            const eventKey = `bookEvent_${Date.now()}_${Math.random()}`;
-            localStorage.setItem(eventKey, JSON.stringify(event));
-            
-            // Clean up after a short delay
-            setTimeout(() => {
-                localStorage.removeItem(eventKey);
-            }, 1000);
-        }
-    }, []);
+    if (typeof window !== "undefined") {
+      const event = {
+        type: eventType,
+        data: data,
+        timestamp: Date.now(),
+        tabId: sessionStorage.getItem("tabId") || "unknown",
+      };
 
+      // Use a temporary localStorage key for event broadcasting
+      const eventKey = `bookEvent_${Date.now()}_${Math.random()}`;
+      localStorage.setItem(eventKey, JSON.stringify(event));
 
-   const addNewBook = useCallback((newBook: Omit<Book, "id">) => {
-        const bookWithId = {
-            ...newBook,
-            id: uuidv4(),
-        };
-        
-        setBooks((prevBooks: Book[]) => {
-            const updatedBooks = [...prevBooks, bookWithId];
-            
-            // Broadcast to other tabs - only send the new book, not all books
-            broadcastToOtherTabs('ADD_BOOK', bookWithId);
-            
-            return updatedBooks;
+      // Clean up after a short delay
+      setTimeout(() => {
+        localStorage.removeItem(eventKey);
+      }, 1000);
+    }
+  }, []);
+
+  const addNewBook = useCallback(
+    (newBook: Omit<Book, "id">) => {
+      const isDuplicate = books.some(
+        (existingBook) =>
+          existingBook.title.toLowerCase().trim() ===
+            newBook.title.toLowerCase().trim() &&
+          existingBook.author.toLowerCase().trim() ===
+            newBook.author.toLowerCase().trim()
+      );
+
+      if (isDuplicate) {
+        toast("Book already exists!", {
+          description: `"${newBook.title}" by ${newBook.author} is already in your library.`,
+          className:
+            "bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-md border border-yellow-300/30 text-white shadow-2xl",
+          descriptionClassName: "text-yellow-100",
+          style: {
+            background:
+              "linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(249, 115, 22, 0.9) 100%)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(251, 191, 36, 0.3)",
+            boxShadow:
+              "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+          },
         });
-        
-        toast("Book added successfully!", {
-            description: `"${newBook.title}" has been added to your library.`,
-            className: "bg-gradient-to-r from-green-500/90 to-emerald-500/90 backdrop-blur-md border border-green-300/30 text-white shadow-2xl",
-            descriptionClassName: "text-green-100",
-        });
-    }, [broadcastToOtherTabs]);
+        return; // Exit early if duplicate found
+      }
+
+      // If not duplicate, proceed with adding the book
+      const bookWithId = {
+        ...newBook,
+        id: uuidv4(),
+      };
+
+      setBooks((prevBooks: Book[]) => {
+        const updatedBooks = [...prevBooks, bookWithId];
+
+        // Broadcast to other tabs - only send the new book, not all books
+        broadcastToOtherTabs("ADD_BOOK", bookWithId);
+
+        return updatedBooks;
+      });
+
+      toast("Book added successfully!", {
+        description: `"${newBook.title}" has been added to your library.`,
+        className:
+          "bg-gradient-to-r from-green-500/90 to-emerald-500/90 backdrop-blur-md border border-green-300/30 text-white shadow-2xl",
+        descriptionClassName: "text-green-100",
+      });
+    },
+    [broadcastToOtherTabs,books]
+  );
 
   useEffect(() => {
     fetchBooks();
   }, []);
 
-   useEffect(() => {
-        // Generate a unique tab ID for this session
-        if (typeof window !== 'undefined' && !sessionStorage.getItem('tabId')) {
-            sessionStorage.setItem('tabId', uuidv4());
-        }
+  useEffect(() => {
+    // Generate a unique tab ID for this session
+    if (typeof window !== "undefined" && !sessionStorage.getItem("tabId")) {
+      sessionStorage.setItem("tabId", uuidv4());
+    }
 
-        const handleStorageChange = (e: StorageEvent) => {
-            // Only listen to our book events
-            if (e.key && e.key.startsWith('bookEvent_') && e.newValue) {
-                try {
-                    const event = JSON.parse(e.newValue);
-                    const currentTabId = sessionStorage.getItem('tabId');
-                    
-                    // Don't process events from the same tab
-                    if (event.tabId === currentTabId) {
-                        return;
-                    }
-                    
-                    console.log('Received cross-tab event:', event);
-                    
-                    switch (event.type) {
-                        case 'ADD_BOOK':
-                            setBooks((prevBooks: Book[]) => {
-                                // Check if book already exists to avoid duplicates
-                                const bookExists = prevBooks.some(book => book.id === event.data.id);
-                                if (!bookExists) {
-                                    console.log('Adding book from other tab:', event.data);
-                                    return [...prevBooks, event.data];
-                                }
-                                return prevBooks;
-                            });
-                            break;
-                            
-                        case 'UPDATE_BOOK':
-                            setBooks((prevBooks: Book[]) => 
-                                prevBooks.map(book => 
-                                    book.id === event.data.id ? event.data : book
-                                )
-                            );
-                            break;
-                            
-                        case 'DELETE_BOOK':
-                            setBooks((prevBooks: Book[]) => 
-                                prevBooks.filter(book => book.id !== event.data.bookId)
-                            );
-                            break;
-                            
-                        case 'REFRESH_BOOKS':
-                            // Trigger a refetch in this tab
-                            fetchBooks();
-                            break;
-                    }
-                } catch (error) {
-                    console.error('Error parsing storage event:', error);
+    const handleStorageChange = (e: StorageEvent) => {
+      // Only listen to our book events
+      if (e.key && e.key.startsWith("bookEvent_") && e.newValue) {
+        try {
+          const event = JSON.parse(e.newValue);
+          const currentTabId = sessionStorage.getItem("tabId");
+
+          // Don't process events from the same tab
+          if (event.tabId === currentTabId) {
+            return;
+          }
+
+          console.log("Received cross-tab event:", event);
+
+          switch (event.type) {
+            case "ADD_BOOK":
+              setBooks((prevBooks: Book[]) => {
+                // Check if book already exists to avoid duplicates
+                const bookExists = prevBooks.some(
+                  (book) => book.id === event.data.id
+                );
+                if (!bookExists) {
+                  console.log("Adding book from other tab:", event.data);
+                  return [...prevBooks, event.data];
                 }
-            }
-        };
+                return prevBooks;
+              });
+              break;
 
-        if (typeof window !== 'undefined') {
-            window.addEventListener('storage', handleStorageChange);
-            return () => window.removeEventListener('storage', handleStorageChange);
+            case "UPDATE_BOOK":
+              setBooks((prevBooks: Book[]) =>
+                prevBooks.map((book) =>
+                  book.id === event.data.id ? event.data : book
+                )
+              );
+              break;
+
+            case "DELETE_BOOK":
+              setBooks((prevBooks: Book[]) =>
+                prevBooks.filter((book) => book.id !== event.data.bookId)
+              );
+              break;
+
+            case "REFRESH_BOOKS":
+              // Trigger a refetch in this tab
+              fetchBooks();
+              break;
+          }
+        } catch (error) {
+          console.error("Error parsing storage event:", error);
         }
-    }, []);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", handleStorageChange);
+      return () => window.removeEventListener("storage", handleStorageChange);
+    }
+  }, []);
 
   return (
     <BooksContext.Provider
-      value={{ books, setBooks, isBooksLoading, setIsBooksLoading,addNewBook,fetchBooks }}
+      value={{
+        books,
+        setBooks,
+        isBooksLoading,
+        setIsBooksLoading,
+        addNewBook,
+        fetchBooks,
+      }}
     >
       {children}
     </BooksContext.Provider>
