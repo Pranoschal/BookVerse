@@ -7,7 +7,7 @@ import {
 import { NextRequest } from 'next/server';
  
 
-const serviceAdapter = new GroqAdapter({ model: "qwen-qwq-32b" });
+const serviceAdapter = new GroqAdapter({ model: "moonshotai/kimi-k2-instruct" });
 const runtime = new CopilotRuntime();
  
 export const POST = async (req: NextRequest) => {
