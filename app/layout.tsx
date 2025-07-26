@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <BooksProvider>
       <html lang="en">
-        <body className={inter.className}>
+        <body className={inter.className} >
           <CopilotKit runtimeUrl="/api/copilotkit">{children}</CopilotKit>
           <Toaster />
         </body>

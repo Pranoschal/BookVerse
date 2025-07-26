@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Book } from "@/types-interfaces/types";
 import { languageMap,getAllLanguageNames } from "@/lib/languageMap";
+import { useBooks } from "@/app/contexts/booksContext";
 
 interface BookModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export default function BookModalComponent({
   mode,
   genres,
 }: BookModalProps) {
+  const { closeModal } = useBooks()
   const languages = getAllLanguageNames(languageMap)
   const [formData, setFormData] = useState<Book>({
     id: "",
@@ -86,6 +88,7 @@ export default function BookModalComponent({
       });
     }
   }, [mode, editingBook, isOpen, genres]);
+
 
   const handleInputChange = (field: keyof Book, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -135,21 +138,7 @@ export default function BookModalComponent({
       }
 
       // Reset form
-      setFormData({
-        id: "",
-        title: "",
-        author: "",
-        cover: "",
-        rating: 0,
-        genre: "",
-        description: "",
-        pages: 0,
-        publishYear: new Date().getFullYear(),
-        status: "none",
-        language: "",
-        publisher: "",
-      });
-      setErrors({});
+      handleClose()
     }
   };
 
@@ -562,8 +551,11 @@ export default function BookModalComponent({
                   </Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value: any) =>
-                      handleInputChange("status", value)
+                    onValueChange={(value: any) =>{
+                       if (value && value !== ""){
+                             handleInputChange("status", value);
+                        }
+                    }
                     }
                   >
                     <SelectTrigger className="bg-white/90 border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 text-sm sm:text-base">

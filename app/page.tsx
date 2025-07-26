@@ -3,7 +3,15 @@
 import { CopilotPopup } from "@copilotkit/react-ui";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Search, BookOpen, Filter, Grid, List, Loader2, Save } from "lucide-react";
+import {
+  Search,
+  BookOpen,
+  Filter,
+  Grid,
+  List,
+  Loader2,
+  Save,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,24 +48,47 @@ import { ChatHeader } from "@/components/copilotkitpopup/header";
 import { ChatButton } from "@/components/copilotkitpopup/chat-button";
 
 export default function BookWebsite() {
-  const { books, setBooks, isBooksLoading, addNewBook } = useBooks();
+  const {
+    books,
+    setBooks,
+    isBooksLoading,
+    addNewBook,
+    updateBookStatus,
+    isBookModalOpen,
+    setIsBookModalOpen,
+    isDetailsModalOpen,
+    setIsDetailsModalOpen,
+    editingBook,
+    setEditingBook,
+    selectedBook,
+    setSelectedBook,
+    modalMode,
+    setModalMode,
+    viewMode,
+    setViewMode,
+    editBook,
+    deleteBook,
+    openEditModal,
+    saveLibraryLoading,
+    setSaveLibraryLoading,
+    openAddModal,
+    closeModal,
+    closeDetailsModal,
+  } = useBooks();
+
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [activeTab, setActiveTab] = useState<string>("all");
-  const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
-  const [modalMode, setModalMode] = useState<ModalMode>("add");
-  const [editingBook, setEditingBook] = useState<Book | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [saveLibraryLoading, setSaveLibraryLoading] = useState<boolean>(false);
+
 
   const genres: string[] = useMemo(() => {
     const allGenres = books.map((book) => book.genre);
     return ["all", ...Array.from(new Set(allGenres))];
   }, [books]);
 
-  const filteredGenres = genres.filter(genre => genre.toLowerCase() !== "all");
+  const filteredGenres = genres.filter(
+    (genre) => genre.toLowerCase() !== "all"
+  );
 
   const filteredBooks: Book[] = useMemo(() => {
     let filtered = books;
@@ -94,7 +125,7 @@ export default function BookWebsite() {
 
     return filtered;
   }, [books, searchQuery, selectedGenre, activeTab]);
-  
+
   const getStatusCounts = (): StatusCounts => {
     return {
       all: books.length,
@@ -106,56 +137,6 @@ export default function BookWebsite() {
 
   const statusCounts: StatusCounts = getStatusCounts();
 
-  const updateBookStatus: UpdateBookStatus = (
-    bookId: string,
-    newStatus: Book["status"]
-  ) => {
-    setBooks((prevBooks) =>
-      prevBooks.map((book) =>
-        book.id === bookId ? { ...book, status: newStatus } : book
-      )
-    );
-  };
-
-  const editBook: BookFunc = (updatedBook: Book) => {
-    setBooks((prevBooks) =>
-      prevBooks.map((book) => (book.id === updatedBook.id ? updatedBook : book))
-    );
-    setIsBookModalOpen(false);
-    setEditingBook(null);
-  };
-
-  const deleteBook: BookIdFunc = (bookId: string) => {
-    setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId));
-  };
-
-  const openAddModal: VoidFunc = () => {
-    setModalMode("add");
-    setEditingBook(null);
-    setIsBookModalOpen(true);
-  };
-
-  const openEditModal: BookFunc = (book: Book) => {
-    setModalMode("edit");
-    setEditingBook(book);
-    setIsBookModalOpen(true);
-    setIsDetailsModalOpen(false); // Close details modal if open
-  };
-
-  const openDetailsModal: BookFunc = (book: Book) => {
-    setSelectedBook(book);
-    setIsDetailsModalOpen(true);
-  };
-
-  const closeModal: VoidFunc = () => {
-    setIsBookModalOpen(false);
-    setEditingBook(null);
-  };
-
-  const closeDetailsModal: VoidFunc = () => {
-    setIsDetailsModalOpen(false);
-    setSelectedBook(null);
-  };
 
   const handleSaveLibrary = async () => {
     try {
@@ -313,7 +294,7 @@ export default function BookWebsite() {
                 className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-lg px-6 py-2 font-semibold transition-all duration-300 hover:scale-105"
               >
                 {saveLibraryLoading ? (
-                  <> 
+                  <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Saving Library...
                   </>
@@ -336,10 +317,6 @@ export default function BookWebsite() {
           viewMode={viewMode}
           statusCounts={statusCounts}
           filteredBooks={filteredBooks}
-          openDetailsModal={openDetailsModal}
-          openEditModal={openEditModal}
-          deleteBook={deleteBook}
-          updateBookStatus={updateBookStatus}
         />
       </div>
 

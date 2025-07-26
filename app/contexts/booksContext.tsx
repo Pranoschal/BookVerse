@@ -1,6 +1,6 @@
 "use client";
 
-import { Book } from "@/types-interfaces/types";
+import { Book, BookFunc, BookIdFunc, ModalMode, ViewMode, VoidFunc } from "@/types-interfaces/types";
 import {
   createContext,
   useContext,
@@ -11,14 +11,43 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+import { UpdateBookStatus, SetActiveTab } from '../../types-interfaces/types';
 
 type BooksContextType = {
   books: Book[];
   setBooks: React.Dispatch<React.SetStateAction<Book[]>>;
   isBooksLoading: boolean;
   setIsBooksLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  editingBook: Book | null;
+  setEditingBook: React.Dispatch<React.SetStateAction<Book | null>>;
+  modalMode : ModalMode;
+  setModalMode : React.Dispatch<React.SetStateAction<ModalMode>>;
+  viewMode : ViewMode;
+  setViewMode : React.Dispatch<React.SetStateAction<ViewMode>>
+  isDetailsModalOpen : boolean;
+  setIsDetailsModalOpen : React.Dispatch<React.SetStateAction<boolean>>
+  isBookModalOpen: boolean;
+  setIsBookModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedBook : Book | null
+  setSelectedBook : React.Dispatch<React.SetStateAction<Book | null>>
+  searchQuery : string;
+  activeTab : string;
+  setActiveTab : React.Dispatch<React.SetStateAction<string>>
+  setSearchQuery : React.Dispatch<React.SetStateAction<string>>
+  selectedGenre : string;
+  setSelectedGenre : React.Dispatch<React.SetStateAction<string>>
+  saveLibraryLoading : boolean;
+  setSaveLibraryLoading : React.Dispatch<React.SetStateAction<boolean>>;
   addNewBook: (newBook: Omit<Book, "id">) => void;
   fetchBooks: () => Promise<void>;
+  updateBookStatus: UpdateBookStatus;
+  editBook: BookFunc;
+  openEditModal : BookFunc;
+  deleteBook : BookIdFunc;
+  openDetailsModal : BookFunc;
+  openAddModal : VoidFunc;
+  closeModal : VoidFunc;
+  closeDetailsModal: VoidFunc;
 };
 
 const BooksContext = createContext<BooksContextType | undefined>(undefined);
@@ -34,6 +63,18 @@ export const useBooks = () => {
 export const BooksProvider = ({ children }: { children: ReactNode }) => {
   const [books, setBooks] = useState<Book[]>([]);
   const [isBooksLoading, setIsBooksLoading] = useState<boolean>(false);
+  const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [modalMode, setModalMode] = useState<ModalMode>("add");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState<boolean>(false);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [saveLibraryLoading, setSaveLibraryLoading] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedGenre, setSelectedGenre] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>("all");
+
+
 
   const fetchBooks = async () => {
     setIsBooksLoading(true);
@@ -126,7 +167,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
               "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
           },
         });
-        return; // Exit early if duplicate found
+        return;
       }
 
       // If not duplicate, proceed with adding the book
@@ -151,8 +192,60 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
         descriptionClassName: "text-green-100",
       });
     },
-    [broadcastToOtherTabs,books]
+    [broadcastToOtherTabs, books]
   );
+
+  const updateBookStatus: UpdateBookStatus = useCallback(
+    (bookId: string, newStatus: Book["status"]) => {
+      console.log('BOOK STATUS SET',newStatus)
+      setBooks((prevBooks) =>
+        prevBooks.map((book) =>
+          book.id === bookId ? { ...book, status: newStatus } : book
+        )
+      );
+    },
+    []
+  );
+
+  const editBook = useCallback((updatedBook: Book) => {
+    setBooks((prevBooks) =>
+      prevBooks.map((book) => (book.id === updatedBook.id ? updatedBook : book))
+    );
+    setIsBookModalOpen(false);
+    setEditingBook(null);
+  },[]);
+
+  const openEditModal = useCallback((book: Book) => {
+    setModalMode("edit");
+    setEditingBook(book);
+    setIsBookModalOpen(true);
+    setIsDetailsModalOpen(false); // Close details modal if open
+  },[]);
+
+   const openDetailsModal = useCallback((book: Book) => {
+    setSelectedBook(book);
+    setIsDetailsModalOpen(true);
+  },[]);
+
+  const deleteBook = useCallback((bookId: string) => {
+      setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId));
+    },[]);
+
+  const openAddModal = useCallback(() => {
+      setModalMode("add");
+      setEditingBook(null);
+      setIsBookModalOpen(true);
+    },[]);
+
+  const closeModal = useCallback(() => {
+    setIsBookModalOpen(false);
+    setEditingBook(null);
+  },[]);
+
+    const closeDetailsModal = useCallback(() => {
+    setIsDetailsModalOpen(false);
+    setSelectedBook(null);
+  },[]);
 
   useEffect(() => {
     fetchBooks();
@@ -175,9 +268,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
           if (event.tabId === currentTabId) {
             return;
           }
-
-          console.log("Received cross-tab event:", event);
-
+          
           switch (event.type) {
             case "ADD_BOOK":
               setBooks((prevBooks: Book[]) => {
@@ -186,7 +277,6 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
                   (book) => book.id === event.data.id
                 );
                 if (!bookExists) {
-                  console.log("Adding book from other tab:", event.data);
                   return [...prevBooks, event.data];
                 }
                 return prevBooks;
@@ -227,12 +317,40 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
   return (
     <BooksContext.Provider
       value={{
+        activeTab,
+        setActiveTab,
+        selectedGenre,
+        setSelectedGenre,
+        searchQuery,
+        setSearchQuery,
         books,
         setBooks,
         isBooksLoading,
         setIsBooksLoading,
+        editingBook,
+        setEditingBook,
+        modalMode,
+        setModalMode,
+        viewMode,
+        setViewMode,
+        isDetailsModalOpen,
+        setIsDetailsModalOpen,
+        isBookModalOpen,
+        setIsBookModalOpen,
+        selectedBook,
+        setSelectedBook,
+        saveLibraryLoading,
+        setSaveLibraryLoading,
         addNewBook,
         fetchBooks,
+        updateBookStatus,
+        editBook,
+        openEditModal,
+        openDetailsModal,
+        deleteBook,
+        openAddModal,
+        closeModal,
+        closeDetailsModal
       }}
     >
       {children}

@@ -62,7 +62,6 @@ export function useBookCopilotActions<
         }
 
         const books = await response.json();
-        console.log(books,'BOOKS')
         if (books.length === 0) {
           return "No books found for your search query.";
         }
@@ -304,7 +303,6 @@ The book was not added to avoid duplicates. If you want to update the existing b
         status: status as "none" | "wishlist" | "readLater" | "read",
       };
 
-      console.log(newBook)
       // Add the book
       addNewBook(newBook as TAdd);
 

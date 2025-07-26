@@ -33,6 +33,7 @@ export default function BookRecommendationPage() {
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  
 
   // Modify your useCopilotChat hook to include the key
   const { appendMessage, stopGeneration, visibleMessages, setMessages, reset } =
@@ -161,10 +162,6 @@ export default function BookRecommendationPage() {
       }
     },
   });
-
-  useEffect(() => {
-    console.log(visibleMessages, "MESSAGES");
-  }, [visibleMessages]);
 
   const handleGetRecommendations = async () => {
     setRecommendations([]);
